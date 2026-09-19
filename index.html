@@ -197,6 +197,10 @@ nav button.on{color:var(--accent)}
 .waiting{text-align:center;padding:12px 0}
 .waiting .big{font-size:48px;margin-bottom:6px}
 .pin{letter-spacing:.5em;text-align:center;font-size:21px;font-weight:700}
+.phone{display:grid;grid-template-columns:112px 1fr;gap:0}
+.phone select{border-radius:11px 0 0 11px;border-right:none;padding-left:9px;padding-right:2px;
+  font-size:14px;background:#f4f1ea;font-weight:600}
+.phone input{border-radius:0 11px 11px 0}
 
 #splash{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:16px;transition:opacity .4s;padding:22px}
@@ -261,7 +265,9 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <div class="field"><label>Your full name</label>
       <input type="text" id="gName" autocomplete="name" placeholder="e.g. Thandi Zondi"></div>
     <div class="field"><label>Phone number</label>
+      <div class="phone"><select id="gCC"></select>
       <input type="tel" id="gPhone" autocomplete="tel" inputmode="numeric" placeholder="071 234 5678"></div>
+      <p class="muted" id="gPhoneHint" style="margin:5px 0 0"></p></div>
     <div class="f2">
       <div class="field"><label>Choose a PIN</label>
         <input type="password" id="gPin" class="pin" inputmode="numeric" maxlength="6" placeholder="••••"></div>
@@ -279,7 +285,9 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <p class="sub">Same number and PIN you signed up with.</p>
     <div class="err" id="errSignin"></div>
     <div class="field"><label>Phone number</label>
+      <div class="phone"><select id="gCC2"></select>
       <input type="tel" id="gPhone2" autocomplete="tel" inputmode="numeric" placeholder="071 234 5678"></div>
+      <p class="muted" id="gPhoneHint2" style="margin:5px 0 0"></p></div>
     <div class="field"><label>PIN</label>
       <input type="password" id="gPinIn" class="pin" inputmode="numeric" maxlength="6" placeholder="••••"></div>
     <button class="btn" onclick="doSignin()">Sign in</button>
@@ -444,7 +452,8 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
           <select id="sPaid"><option>cash</option><option>transfer</option><option>owed</option></select></div>
       </div>
       <div class="field"><label>Phone (builds the customer book)</label>
-        <input type="tel" id="sPhone" inputmode="numeric" placeholder="optional but valuable"></div>
+        <div class="phone"><select id="sCC"></select>
+        <input type="tel" id="sPhone" inputmode="numeric" placeholder="optional but valuable"></div></div>
       <button class="btn" onclick="saveSale()">Save sale</button>
       <div class="sp"></div>
       <p class="muted center" id="saleHint">—</p>
@@ -706,7 +715,38 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
    ZONDI HORIZON FLOCK TRACKER — September 2026
    Owner: paste the Apps Script /exec link below, save, upload.
    ========================================================== */
-const FARM_URL = "https://script.google.com/macros/s/AKfycbzlbNrQGhDzznik74aCiFhxYZzTwHXK8xGJBaBMwItPAMzn-QlJRwAK66lzBWTG40xw/exec";
+const FARM_URL = "";
+
+const COUNTRIES = [
+  ['ZA','🇿🇦','27','South Africa'], ['GB','🇬🇧','44','United Kingdom'], ['ZW','🇿🇼','263','Zimbabwe'],
+  ['BW','🇧🇼','267','Botswana'], ['LS','🇱🇸','266','Lesotho'], ['SZ','🇸🇿','268','Eswatini'],
+  ['MZ','🇲🇿','258','Mozambique'], ['NA','🇳🇦','264','Namibia'], ['ZM','🇿🇲','260','Zambia'],
+  ['MW','🇲🇼','265','Malawi'], ['KE','🇰🇪','254','Kenya'], ['NG','🇳🇬','234','Nigeria'],
+  ['AE','🇦🇪','971','UAE'], ['US','🇺🇸','1','USA / Canada'], ['AU','🇦🇺','61','Australia'],
+  ['IE','🇮🇪','353','Ireland'], ['NL','🇳🇱','31','Netherlands'], ['DE','🇩🇪','49','Germany'],
+  ['FR','🇫🇷','33','France'], ['IN','🇮🇳','91','India']
+];
+const DIAL = COUNTRIES.map(c => c[2]);
+
+function fillCountries(id, def){
+  const el = document.getElementById(id); if(!el) return;
+  el.innerHTML = COUNTRIES.map(c => '<option value="' + c[2] + '">' + c[1] + ' +' + c[2] + '</option>').join('');
+  let saved = def;
+  try { saved = localStorage.getItem('zondi_cc') || def; } catch(e){}
+  el.value = saved || '27';
+}
+function e164(raw, cc){
+  const s0 = String(raw || '').trim();
+  const plus = s0.charAt(0) === '+';
+  let d = s0.replace(/[^0-9]/g, '');
+  cc = String(cc || '27').replace(/[^0-9]/g, '') || '27';
+  if(plus){ /* already international */ }
+  else if(d.indexOf('00') === 0) d = d.slice(2);
+  else if(d.charAt(0) === '0') d = cc + d.slice(1);
+  else if(!DIAL.some(k => d.indexOf(k) === 0)) d = cc + d;
+  return d ? '+' + d : '';
+}
+function rememberCC(cc){ try { localStorage.setItem('zondi_cc', cc); } catch(e){} }
 
 const KEY = 'zondi_v2';
 const DEF = {
@@ -963,6 +1003,14 @@ function pane(n){
   window.scrollTo(0,0);
 }
 function gateErr(id,m){ const e=$(id); e.textContent=m; e.classList.add('on'); }
+function phoneHint(numId, ccId, hintId){
+  const el = $(hintId); if(!el) return;
+  const v = $(numId).value.trim();
+  if(!v){ el.textContent=''; return; }
+  const full = e164(v, $(ccId).value);
+  const c = COUNTRIES.find(x => full.indexOf('+' + x[2]) === 0);
+  el.innerHTML = 'Saved as <b>' + full + '</b>' + (c ? ' · ' + c[3] : '');
+}
 function openApp(){ $('gate').classList.add('gone'); renderAll(); }
 function standalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -984,15 +1032,17 @@ function setFarm(){
   S.url = u; save(); boot();
 }
 async function doSignup(){
-  const name=$('gName').value.trim(), phone=$('gPhone').value.trim();
+  const name=$('gName').value.trim(), phone=$('gPhone').value.trim(), cc=$('gCC').value;
   const pin=$('gPin').value.trim(), pin2=$('gPin2').value.trim();
   const code=$('gCode').value.trim().toUpperCase();
   if(name.length<2) return gateErr('errSignup','Please type your full name.');
-  if(phone.replace(/\D/g,'').length<9) return gateErr('errSignup','Please type a valid phone number.');
+  if(e164(phone,cc).replace(/\D/g,'').length<9)
+    return gateErr('errSignup','That number looks too short. Check the flag next to it.');
   if(pin.length<4) return gateErr('errSignup','Your PIN must be at least 4 digits.');
   if(pin!==pin2) return gateErr('errSignup','The two PINs do not match.');
   try{
-    const j = await api('signup',{ name, phone, pin, code });
+    rememberCC(cc);
+    const j = await api('signup',{ name, phone, cc, pin, code });
     S.auth = { token:j.token, me:j.me, farm:j.farm }; save();
     if(j.me.status==='active'){
       toast(j.returning ? 'Welcome back, ' + j.me.name.split(' ')[0]
@@ -1002,8 +1052,8 @@ async function doSignup(){
     } else pane('pending');
   }catch(e){
     if(/already has an account/i.test(e.message)){
-      $('gPhone2').value = phone;
-      pane('signin');
+      $('gPhone2').value = phone; $('gCC2').value = cc;
+      pane('signin'); phoneHint('gPhone2','gCC2','gPhoneHint2');
       gateErr('errSignin','That number already has an account — sign in with your PIN. ' +
         'If you forgot it, phone the office.');
       return;
@@ -1012,10 +1062,11 @@ async function doSignup(){
   }
 }
 async function doSignin(){
-  const phone=$('gPhone2').value.trim(), pin=$('gPinIn').value.trim();
+  const phone=$('gPhone2').value.trim(), pin=$('gPinIn').value.trim(), cc=$('gCC2').value;
   if(!phone||!pin) return gateErr('errSignin','Enter your number and PIN.');
   try{
-    const j = await api('login',{ phone, pin });
+    rememberCC(cc);
+    const j = await api('login',{ phone, cc, pin });
     S.auth = { token:j.token, me:j.me, farm:j.farm }; save();
     if(j.me.status==='active'){ await syncNow(true); openApp(); } else pane('pending');
   }catch(e){ gateErr('errSignin', e.message); }
@@ -1135,7 +1186,8 @@ function saveSale(){
   if(!eggs) return toast('Add trays or loose eggs first');
   queue('sales', { id:uid('s'), date:$('sDate').value||today(), customer:cust,
     trays, singles, eggs, amount:num($('sAmt').value), paid:$('sPaid').value,
-    phone:$('sPhone').value.trim(), note:'', by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+    phone: $('sPhone').value.trim() ? e164($('sPhone').value.trim(), $('sCC').value) : '',
+    note:'', by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
   $('sTrays').value=0; $('sSingles').value=0; $('sAmt').value=''; delete $('sAmt').dataset.touched;
   $('sPhone').value=''; priceSale();
   toast('Sale saved — ' + eggs + ' eggs');
@@ -1517,8 +1569,8 @@ function drawTeam(users, codes, mine){
   $('memberBox').innerHTML = act.map(u => {
     const locked = u.role==='ceo' || (mine!=='ceo' && (u.role==='manager'));
     return '<div class="member"><div class="av">' + initials(u.name) + '</div>' +
-      '<div class="who"><b>' + esc(u.name) + '</b><span>' + (ROLE[u.role]||u.role) +
-      (u.status==='blocked'?' · removed':'') + (u.seen?' · last seen '+esc(u.seen):'') + '</span></div>' +
+      '<div class="who"><b>' + esc(u.name) + '</b><span>' + esc(u.phone) + ' · ' + (ROLE[u.role]||u.role) +
+      (u.status==='blocked'?' · removed':'') + (u.seen?' · seen '+esc(u.seen):'') + '</span></div>' +
       '<div class="acts">' + (locked
         ? '<button disabled style="opacity:.4">' + (ROLE[u.role]||u.role) + '</button>'
         : '<button onclick="cycleRole(\'' + u.id + '\',\'' + u.role + '\')">' +
@@ -1699,6 +1751,9 @@ document.querySelectorAll('#recTabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.rsec').forEach(x => x.classList.remove('on'));
   $('r-'+b.dataset.r).classList.add('on');
 });
+fillCountries('gCC','27'); fillCountries('gCC2','27'); fillCountries('sCC','27');
+['gPhone','gCC'].forEach(id => $(id).addEventListener('input', () => phoneHint('gPhone','gCC','gPhoneHint')));
+['gPhone2','gCC2'].forEach(id => $(id).addEventListener('input', () => phoneHint('gPhone2','gCC2','gPhoneHint2')));
 ['sTrays','sSingles'].forEach(id => $(id).addEventListener('input', priceSale));
 $('sAmt').addEventListener('input', function(){ this.dataset.touched = '1'; });
 $('wKg').addEventListener('input', weightPreview);
