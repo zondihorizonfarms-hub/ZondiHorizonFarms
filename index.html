@@ -697,7 +697,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
    ZONDI HORIZON FLOCK TRACKER — September 2026
    Owner: paste the Apps Script /exec link below, save, upload.
    ========================================================== */
-const FARM_URL = "";
+const FARM_URL = "https://script.google.com/macros/s/AKfycbzlbNrQGhDzznik74aCiFhxYZzTwHXK8xGJBaBMwItPAMzn-QlJRwAK66lzBWTG40xw/exec";
 
 const KEY = 'zondi_v2';
 const DEF = {
@@ -1701,7 +1701,19 @@ renderAll();
 boot();
 setTimeout(() => { const sp=$('splash'); if(sp){ sp.classList.add('gone'); setTimeout(()=>sp.remove(),450); } }, 850);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      if(!sw) return;
+      sw.addEventListener('statechange', () => {
+        if(sw.state === 'installed' && navigator.serviceWorker.controller){
+          sw.postMessage('skipWaiting');       // a new version is live
+          toast('Updated — reopening');
+          setTimeout(() => location.reload(), 900);
+        }
+      });
+    });
+  }).catch(()=>{});
 }
 save();
 </script>
