@@ -51,6 +51,7 @@ header{position:sticky;top:0;z-index:40;background:var(--deep);color:#fff;
 
 main{padding:12px 12px 6px;max-width:640px;margin:0 auto}
 .view{display:none}.view.on{display:block;animation:fade .18s ease}
+.rsec{display:none}.rsec.on{display:block;animation:fade .18s ease}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:14px;margin-bottom:11px;box-shadow:var(--sh)}
@@ -218,7 +219,7 @@ nav button.on{color:var(--accent)}
 .sp{height:6px}
 hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 .locked{opacity:.45;pointer-events:none}
-#installCard{display:none}#installCard.on{display:block}
+
 </style>
 </head>
 <body>
@@ -556,7 +557,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
       <div class="line"><span>Break-even tray price</span><b id="mBE">—</b></div>
       <div class="line"><span>Tray price today</span><b id="mNow">—</b></div>
     </div>
-    <div id="mVerdict" class="sp"></div>
+    <div id="mVerdict"></div>
   </div>
 
   <div class="card">
@@ -628,11 +629,21 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <h2>Install on this phone</h2>
     <p class="muted" style="margin:0 0 11px">Put Zondi Horizon on the home screen — own icon,
       full screen, works without signal.</p>
-    <button class="btn" onclick="doInstall()">Install app</button>
+    <button class="btn" id="installBtn" onclick="doInstall()">Install app</button>
     <div id="iosHelp" class="alert blue" style="display:none;margin-top:10px">
-      <span class="ic">📲</span><div>On iPhone: tap <b>share</b> at the bottom of Safari, then
-      <b>Add to Home Screen</b>.</div>
+      <span class="ic">📲</span><div><b>On iPhone:</b> tap the <b>share</b> button
+      (the square with an arrow, at the bottom of Safari) → scroll down → <b>Add to Home Screen</b>.
+      <br><br>If you cannot see a share button, you are already in the installed app — nothing to do.</div>
     </div>
+  </div>
+
+  <div class="card">
+    <h2>Share the app</h2>
+    <p class="muted" style="margin:0 0 11px">Send the link to someone joining. Make an invite code
+      first under <b>Team</b> if you want them to skip the waiting screen.</p>
+    <button class="btn ghost" onclick="shareApp()">Share the app link</button>
+    <div class="sp"></div>
+    <button class="btn ghost sm" onclick="copyLink()">Copy link only</button>
   </div>
 
   <div class="card">
@@ -1713,14 +1724,37 @@ function exportAll(){
 
 /* ---------- install ---------- */
 let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e; $('installCard').classList.add('on');
-});
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; refreshInstall(); });
+window.addEventListener('appinstalled', () => { deferredPrompt = null; refreshInstall(); toast('Installed'); });
+
+function refreshInstall(){
+  const card = $('installCard'), btn = $('installBtn');
+  if(!card || !btn) return;
+  if(standalone()){
+    card.style.display = 'none';                       // already installed — nothing to offer
+  } else {
+    card.style.display = '';
+    btn.textContent = deferredPrompt ? 'Install app' : 'How do I install it?';
+  }
+}
 function doInstall(){
-  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt = null; $('installCard').classList.remove('on'); }
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt = null; refreshInstall(); }
   else $('iosHelp').style.display = 'flex';
 }
-window.addEventListener('appinstalled', () => { $('installCard').classList.remove('on'); toast('Installed'); });
+
+/* ---------- share ---------- */
+function appLink(){ return location.origin + location.pathname.replace(/index\.html$/, ''); }
+async function shareApp(){
+  const text = 'Zondi Horizon Farms app — open this link, install it on your phone, then create your account.';
+  try{
+    if(navigator.share){ await navigator.share({ title:'Zondi Horizon Farms', text, url: appLink() }); return; }
+  }catch(e){ if(e && e.name === 'AbortError') return; }
+  copyLink();
+}
+async function copyLink(){
+  try{ await navigator.clipboard.writeText(appLink()); toast('Link copied'); }
+  catch(e){ prompt('Copy this link:', appLink()); }
+}
 
 /* ---------- render + nav ---------- */
 function applyRole(){
@@ -1751,6 +1785,7 @@ document.querySelectorAll('#recTabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.rsec').forEach(x => x.classList.remove('on'));
   $('r-'+b.dataset.r).classList.add('on');
 });
+refreshInstall();
 fillCountries('gCC','27'); fillCountries('gCC2','27'); fillCountries('sCC','27');
 ['gPhone','gCC'].forEach(id => $(id).addEventListener('input', () => phoneHint('gPhone','gCC','gPhoneHint')));
 ['gPhone2','gCC2'].forEach(id => $(id).addEventListener('input', () => phoneHint('gPhone2','gCC2','gPhoneHint2')));
