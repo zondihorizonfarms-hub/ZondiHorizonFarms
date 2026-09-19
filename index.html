@@ -242,8 +242,16 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <img class="logo" id="gl3" alt="">
     <h2>Zondi Horizon Farms</h2>
     <p class="sub">Eggs, feed, sales and flock condition — one set of books for the whole team.</p>
-    <button class="btn" onclick="pane('signup')">Create my account</button>
-    <button class="link" onclick="pane('signin')">I already have an account</button>
+    <div id="installFirst" class="alert blue" style="display:none;margin-bottom:14px">
+      <span class="ic">📲</span><div><b>Install it first, then make your account.</b>
+      Add it to your home screen now — otherwise you will have to sign in again afterwards.</div>
+    </div>
+    <div id="installedHint" class="alert green" style="display:none;margin-bottom:14px">
+      <span class="ic">👋</span><div>Made an account in the browser already?
+      <b>Sign in</b> — the installed app starts fresh, but your account is still there.</div>
+    </div>
+    <button class="btn" onclick="pane('signin')">Sign in</button>
+    <button class="btn ghost" onclick="pane('signup')">Create my account</button>
   </div>
 
   <div class="pane" id="pane-signup">
@@ -285,6 +293,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
       <p class="sub" id="pendSub">You will receive a confirmation once your account is active.</p>
     </div>
     <button class="btn" onclick="checkMe()">Check again</button>
+    <button class="link" onclick="pane('signin')">Wrong account? Sign in as someone else</button>
     <button class="link" onclick="signOut()">Sign out</button>
   </div>
  </div>
@@ -697,7 +706,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
    ZONDI HORIZON FLOCK TRACKER — September 2026
    Owner: paste the Apps Script /exec link below, save, upload.
    ========================================================== */
-const FARM_URL = "https://script.google.com/macros/s/AKfycbzlbNrQGhDzznik74aCiFhxYZzTwHXK8xGJBaBMwItPAMzn-QlJRwAK66lzBWTG40xw/exec";
+const FARM_URL = "";
 
 const KEY = 'zondi_v2';
 const DEF = {
@@ -955,7 +964,18 @@ function pane(n){
 }
 function gateErr(id,m){ const e=$(id); e.textContent=m; e.classList.add('on'); }
 function openApp(){ $('gate').classList.add('gone'); renderAll(); }
-function showGate(n){ $('gate').classList.remove('gone'); pane(n); }
+function standalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function showGate(n){
+  $('gate').classList.remove('gone');
+  const inst = $('installFirst'), back = $('installedHint');
+  if(inst && back){
+    if(standalone()){ inst.style.display='none'; back.style.display='flex'; }
+    else { inst.style.display='flex'; back.style.display='none'; }
+  }
+  pane(n);
+}
 
 function setFarm(){
   const u = $('gFarm').value.trim();
@@ -975,10 +995,21 @@ async function doSignup(){
     const j = await api('signup',{ name, phone, pin, code });
     S.auth = { token:j.token, me:j.me, farm:j.farm }; save();
     if(j.me.status==='active'){
-      toast(j.me.role==='ceo' ? 'Company account created — you are the CEO' : 'Welcome to Zondi Horizon');
+      toast(j.returning ? 'Welcome back, ' + j.me.name.split(' ')[0]
+           : j.me.role==='ceo' ? 'Company account created — you are the CEO'
+           : 'Welcome to Zondi Horizon');
       await syncNow(true); openApp();
     } else pane('pending');
-  }catch(e){ gateErr('errSignup', e.message); }
+  }catch(e){
+    if(/already has an account/i.test(e.message)){
+      $('gPhone2').value = phone;
+      pane('signin');
+      gateErr('errSignin','That number already has an account — sign in with your PIN. ' +
+        'If you forgot it, phone the office.');
+      return;
+    }
+    gateErr('errSignup', e.message);
+  }
 }
 async function doSignin(){
   const phone=$('gPhone2').value.trim(), pin=$('gPinIn').value.trim();
