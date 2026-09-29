@@ -52,6 +52,8 @@ header{position:sticky;top:0;z-index:40;background:var(--deep);color:#fff;
 main{padding:12px 12px 6px;max-width:640px;margin:0 auto}
 .view{display:none}.view.on{display:block;animation:fade .18s ease}
 .rsec{display:none}.rsec.on{display:block;animation:fade .18s ease}
+.bsec{display:none}.bsec.on{display:block;animation:fade .18s ease}
+tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:14px;margin-bottom:11px;box-shadow:var(--sh)}
@@ -539,53 +541,177 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 </section>
 
 <!-- ============ MONEY ============ -->
+<!-- ============ BOOKS ============ -->
 <section class="view" id="v-money">
-  <div class="card">
-    <h2>Break-even <span class="pill" id="beChip">—</span></h2>
-    <p class="muted" style="margin:-4px 0 10px" id="costNote"></p>
-    <div class="lines">
-      <div class="line"><span>Feed</span><b id="cFeed">—</b></div>
-      <div class="line"><span>Payroll</span><b id="cPay">—</b></div>
-      <div class="line"><span>Water</span><b id="cWater">—</b></div>
-      <div class="line"><span>Health, transport, other</span><b id="cOther">—</b></div>
-      <div class="line"><span><b>Must cover every month</b></span><b id="cTotal">—</b></div>
-      <div class="line"><span>Per week</span><b id="cWeek">—</b></div>
-    </div>
-    <hr>
-    <div class="lines">
-      <div class="line"><span>Eggs the flock lays</span><b id="mEggs">—</b></div>
-      <div class="line"><span>Break-even tray price</span><b id="mBE">—</b></div>
-      <div class="line"><span>Tray price today</span><b id="mNow">—</b></div>
-    </div>
-    <div id="mVerdict"></div>
+  <div class="segs" id="bookTabs">
+    <button class="on" data-b="pl">📘 Profit &amp; loss</button>
+    <button data-b="price">💰 Price</button>
+    <button data-b="ledger">🧾 Ledger</button>
+    <button data-b="recon">✅ Reconcile</button>
   </div>
 
-  <div class="card">
-    <h2>What the tray price is worth</h2>
-    <p class="muted" style="margin:0 0 10px">At <b>full lay</b> — every batch mature, 95% of eggs sold.
-      Payback is against <span id="mCapex">—</span> of capital in the ground.</p>
-    <div style="overflow-x:auto">
-      <table>
-        <thead><tr><th>Tray</th><th>Per egg</th><th>Revenue/mo</th><th>Profit/mo</th><th>Payback</th></tr></thead>
-        <tbody id="ladder"></tbody>
-      </table>
+  <!-- ---- P&L ---- -->
+  <div class="bsec on" id="b-pl">
+    <div class="card">
+      <h2>The company, month by month</h2>
+      <p class="muted" style="margin:0 0 10px">Every rand in and out since the farm started.
+        Capital is shown apart from running costs — a cage is not a cost of laying eggs.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Month</th><th>Sales</th><th>Running costs</th><th>Net</th><th>Capital</th></tr></thead>
+          <tbody id="plBody"></tbody>
+          <tfoot id="plFoot"></tfoot>
+        </table>
+      </div>
     </div>
-    <div class="sp"></div>
-    <p class="muted">Orange row is where you are. Green row is the target price.</p>
+
+    <div class="card">
+      <h2>Since day one</h2>
+      <div class="lines">
+        <div class="line"><span>Eggs sold</span><b id="ttEggs">—</b></div>
+        <div class="line"><span>Sales banked</span><b id="ttSales">—</b></div>
+        <div class="line"><span>Running costs recorded</span><b id="ttOpex">—</b></div>
+        <div class="line"><span><b>Trading result</b></span><b id="ttNet">—</b></div>
+        <div class="line"><span>Capital invested</span><b id="ttCapex">—</b></div>
+        <div class="line"><span>Still to recover</span><b id="ttRecover">—</b></div>
+      </div>
+      <div class="sp"></div>
+      <div id="plWarn"></div>
+    </div>
+
+    <div class="card">
+      <h2>Break-even <span class="pill" id="beChip">—</span></h2>
+      <p class="muted" style="margin:-4px 0 10px" id="costNote"></p>
+      <div class="lines">
+        <div class="line"><span>Feed</span><b id="cFeed">—</b></div>
+        <div class="line"><span>Payroll</span><b id="cPay">—</b></div>
+        <div class="line"><span>Water</span><b id="cWater">—</b></div>
+        <div class="line"><span>Health, transport, other</span><b id="cOther">—</b></div>
+        <div class="line"><span><b>Must cover every month</b></span><b id="cTotal">—</b></div>
+        <div class="line"><span>Per week</span><b id="cWeek">—</b></div>
+      </div>
+      <hr>
+      <div class="lines">
+        <div class="line"><span>Eggs the flock lays</span><b id="mEggs">—</b></div>
+        <div class="line"><span>Break-even tray price</span><b id="mBE">—</b></div>
+        <div class="line"><span>Tray price today</span><b id="mNow">—</b></div>
+      </div>
+      <div id="mVerdict"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>This month so far</h2>
-    <div class="grid">
-      <div class="tile"><div class="k">Sales in</div><div class="v" id="monIn">—</div><div class="s" id="monEggs">—</div></div>
-      <div class="tile"><div class="k">Feed out</div><div class="v" id="monFeed">—</div><div class="s">bags bought</div></div>
-      <div class="tile"><div class="k">Avg per egg</div><div class="v" id="monPer">—</div><div class="s" id="monPerSub">—</div></div>
-      <div class="tile"><div class="k">Best customer</div><div class="v" style="font-size:15px" id="monCust">—</div><div class="s" id="monCustSub">—</div></div>
+  <!-- ---- price ladder ---- -->
+  <div class="bsec" id="b-price">
+    <div class="card">
+      <h2>What the tray price is worth</h2>
+      <p class="muted" style="margin:0 0 10px">At <b>full lay</b> — every batch mature, 95% of eggs sold.
+        Payback is against <span id="mCapex">—</span> of capital in the ground.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Tray</th><th>Per egg</th><th>Revenue/mo</th><th>Profit/mo</th><th>Payback</th></tr></thead>
+          <tbody id="ladder"></tbody>
+        </table>
+      </div>
+      <div class="sp"></div>
+      <p class="muted">Orange row is where you are. Green row is the target price.</p>
+    </div>
+    <div class="card">
+      <h2>This month so far</h2>
+      <div class="grid">
+        <div class="tile"><div class="k">Sales in</div><div class="v" id="monIn">—</div><div class="s" id="monEggs">—</div></div>
+        <div class="tile"><div class="k">Feed out</div><div class="v" id="monFeed">—</div><div class="s">bags bought</div></div>
+        <div class="tile"><div class="k">Avg per egg</div><div class="v" id="monPer">—</div><div class="s" id="monPerSub">—</div></div>
+        <div class="tile"><div class="k">Best customer</div><div class="v" style="font-size:15px" id="monCust">—</div><div class="s" id="monCustSub">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- ledger ---- -->
+  <div class="bsec" id="b-ledger">
+    <div class="card money-only">
+      <h2>Record money out</h2>
+      <p class="muted" style="margin:0 0 10px">Every purchase, wage and bill. This is what makes the
+        app the company's book rather than an egg counter.</p>
+      <div class="f2">
+        <div class="field"><label>Date</label><input type="date" id="xDate"></div>
+        <div class="field"><label>Amount (R)</label><input type="number" id="xAmt" step="0.01" inputmode="decimal"></div>
+      </div>
+      <div class="f2">
+        <div class="field"><label>Type</label>
+          <select id="xKind">
+            <option value="operating">Running cost</option>
+            <option value="capital">Capital (cages, build, birds)</option>
+          </select></div>
+        <div class="field"><label>Category</label>
+          <select id="xCat">
+            <option>feed</option><option>payroll</option><option>water</option>
+            <option>health</option><option>transport</option><option>packaging</option>
+            <option>housing</option><option>livestock</option><option>equipment</option>
+            <option>setup</option><option>other</option>
+          </select></div>
+      </div>
+      <div class="field"><label>What it was for</label>
+        <input type="text" id="xDesc" placeholder="e.g. 12 bags Rossgro lay mash"></div>
+      <div class="f3">
+        <div class="field"><label>Supplier</label><input type="text" id="xSup" placeholder="Massgrow"></div>
+        <div class="field"><label>Invoice no</label><input type="text" id="xInv" placeholder="158"></div>
+        <div class="field"><label>VAT (R)</label><input type="number" id="xVat" step="0.01" inputmode="decimal" value="0"></div>
+      </div>
+      <button class="btn" onclick="saveExpense()">Save to the ledger</button>
+    </div>
+
+    <div class="card">
+      <h2>Money out <span class="pill" id="ledgerPill">—</span></h2>
+      <div class="field"><label>Show</label>
+        <select id="xFilter" onchange="renderBooks()">
+          <option value="all">Everything</option>
+          <option value="operating">Running costs only</option>
+          <option value="capital">Capital only</option>
+        </select></div>
+      <div id="ledgerBox"></div>
+    </div>
+  </div>
+
+  <!-- ---- reconcile ---- -->
+  <div class="bsec" id="b-recon">
+    <div class="card">
+      <h2>Reconcile a month</h2>
+      <div class="field"><label>Month</label><select id="rcMonth" onchange="renderBooks()"></select></div>
+      <div class="lines">
+        <div class="line"><span>Eggs collected</span><b id="rcColl">—</b></div>
+        <div class="line"><span>Eggs sold</span><b id="rcSold">—</b></div>
+        <div class="line"><span>Broken</span><b id="rcBroken">—</b></div>
+        <div class="line"><span>Unsold / on hand</span><b id="rcUnsold">—</b></div>
+        <div class="line"><span>Sales banked</span><b id="rcCash">—</b></div>
+        <div class="line"><span>Average per egg</span><b id="rcPer">—</b></div>
+        <div class="line"><span>Running costs</span><b id="rcOpex">—</b></div>
+        <div class="line"><span><b>Net for the month</b></span><b id="rcNet">—</b></div>
+      </div>
+      <div class="sp"></div>
+      <div id="rcFlags"></div>
+    </div>
+
+    <div class="card recon-only">
+      <h2>Sign it off</h2>
+      <p class="muted" style="margin:0 0 10px">A sign-off is a note in the book. It never changes a
+        figure — if something is wrong, the record that is wrong gets corrected by whoever recorded it.</p>
+      <div class="field"><label>Finding</label>
+        <select id="rcStatus">
+          <option value="matched">Matched — everything ties up</option>
+          <option value="query">Query — something needs explaining</option>
+        </select></div>
+      <div class="field"><label>Note</label>
+        <input type="text" id="rcNote" placeholder="e.g. R27.10 cash difference still unexplained"></div>
+      <button class="btn" onclick="saveRecon()">Record the sign-off</button>
+    </div>
+
+    <div class="card">
+      <h2>Reconciliation history</h2>
+      <div id="reconBox"></div>
     </div>
   </div>
 </section>
 
-<!-- ============ TEAM ============ -->
 <section class="view" id="v-team">
   <div class="card" id="teamCard">
     <h2>Team <span class="pill" id="teamPill"></span></h2>
@@ -601,6 +727,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
         <select id="cvRole">
           <option value="ops">Operations — records eggs, sales, feed</option>
           <option value="audit">Auditor — view only</option>
+          <option value="acct">Accountant — sees every figure, changes none</option>
           <option value="manager">Manager — records and approves people</option>
         </select></div>
       <div class="field"><label>&nbsp;</label><button class="btn sm" onclick="makeCode()">Make a code</button></div>
@@ -616,6 +743,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
           <tr><td>CEO</td><td>Yes</td><td>Yes</td><td>Everything</td></tr>
           <tr><td>Manager</td><td>Yes</td><td>Yes</td><td>Approve, Ops/Auditor</td></tr>
           <tr><td>Operations</td><td>Yes</td><td>No</td><td>No</td></tr>
+          <tr><td>Accountant</td><td>No</td><td>No</td><td>Signs off the books</td></tr>
           <tr><td>Auditor</td><td>No</td><td>No</td><td>No</td></tr>
         </tbody>
       </table>
@@ -714,7 +842,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 <nav>
   <button class="on" data-v="home"><span class="ic">📊</span>Home</button>
   <button data-v="rec"><span class="ic">✍️</span>Record</button>
-  <button data-v="money"><span class="ic">💰</span>Money</button>
+  <button data-v="money"><span class="ic">📘</span>Books</button>
   <button data-v="team"><span class="ic">👥</span>Team<span class="badge" id="navBadge" style="display:none">0</span></button>
   <button data-v="setup"><span class="ic">⚙️</span>Setup</button>
 </nav>
@@ -775,7 +903,8 @@ const DEF = {
     open_eggs:513, open_sold:513, open_rand:1066.5, open_capex:78564.43, open_feed_kg:112.5
   },
   records:[], sales:[], weights:[], health:[], feed:[], water:[], customers:[],
-  q:{ records:[], sales:[], weights:[], health:[], feed:[], water:[] },
+  expenses:[], recon:[],
+  q:{ records:[], sales:[], weights:[], health:[], feed:[], water:[], expenses:[], recon:[] },
   settingsDirty:false, lastSync:0, pending:0
 };
 
@@ -974,14 +1103,16 @@ function calc(){
 }
 
 /* ---------- roles ---------- */
-const ROLE = { ceo:'CEO', manager:'Manager', ops:'Operations', audit:'Auditor' };
+const ROLE = { ceo:'CEO', manager:'Manager', ops:'Operations', acct:'Accountant', audit:'Auditor' };
 function myRole(){ return (S.auth.me && S.auth.me.role) || ''; }
 function active(){ return S.auth.me && S.auth.me.status === 'active'; }
 function can(what){
   const r = myRole();
   if(!active()) return false;
-  if(r === 'audit') return false;
-  if(what === 'admin') return r === 'ceo' || r === 'manager';
+  if(what === 'recon') return r==='ceo' || r==='manager' || r==='acct';
+  if(what === 'money') return r==='ceo' || r==='manager';
+  if(what === 'admin') return r==='ceo' || r==='manager';
+  if(r === 'audit' || r === 'acct') return false;      // neither records anything
   return true;
 }
 function isAdmin(){ return active() && (myRole()==='ceo' || myRole()==='manager'); }
@@ -1119,6 +1250,13 @@ function normalise(j){
   S.customers = (j.customers||[]).map(c => ({ name:c.name||'', phone:String(c.phone||''), kind:c.kind||'',
                   standing:num(c.standing_trays), first:c.first_seen||'', last:c.last_seen||'',
                   eggs:num(c.total_eggs), rand:num(c.total_rand) }));
+  S.expenses  = (j.expenses||[]).map(x => ({ id:String(x.id), date:String(x.date), kind:x.kind||'operating',
+                  category:x.category||'other', description:x.description||'', supplier:x.supplier||'',
+                  invoice:String(x.invoice_no||''), amount:num(x.amount), vat:num(x.vat),
+                  paid:x.paid||'', by:x.by||'', ts:num(x.ts) }));
+  S.recon     = (j.recon||[]).map(r => ({ id:String(r.id), period:String(r.period), status:r.status||'query',
+                  eggs_note:r.eggs_note||'', cash_note:r.cash_note||'', note:r.note||'',
+                  by:r.by||'', ts:num(r.ts) }));
   if(j.settings) S.settings = { ...S.settings, ...j.settings };
 }
 
@@ -1138,7 +1276,7 @@ async function syncNow(quiet){
     if(j.waiting){ S.auth.me = j.me; save(); showGate('pending'); syncing=false; return; }
     S.auth.me = j.me; S.auth.farm = j.farm;
     normalise(j);
-    S.q = { records:[], sales:[], weights:[], health:[], feed:[], water:[] };
+    S.q = { records:[], sales:[], weights:[], health:[], feed:[], water:[], expenses:[], recon:[] };
     S.settingsDirty = false; S.lastSync = Date.now(); S.pending = num(j.pending);
     save(); renderAll();
     setBar('ok','Synced ' + new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) +
@@ -1554,6 +1692,158 @@ function renderMoney(){
   $('monCustSub').textContent = top ? R(top.rand) + ' all time' : 'record names on sales';
 }
 
+
+/* ---------- the company book ---------- */
+const CAT_ICON = { feed:'🌾', payroll:'👷', water:'💧', health:'🩺', transport:'🚚',
+  packaging:'📦', housing:'🏠', livestock:'🐔', equipment:'🔧', setup:'🏗️', other:'•' };
+
+function months(){
+  const set = new Set();
+  S.sales.forEach(x => set.add(String(x.date).slice(0,7)));
+  S.records.forEach(x => set.add(String(x.date).slice(0,7)));
+  S.expenses.forEach(x => set.add(String(x.date).slice(0,7)));
+  set.add(today().slice(0,7));
+  return [...set].filter(Boolean).sort();
+}
+function monthName(ym){
+  try{ return d2(ym + '-01').toLocaleDateString('en-ZA',{month:'short',year:'numeric'}); }
+  catch(e){ return ym; }
+}
+function bookFor(ym){
+  const inM = d => String(d).slice(0,7) === ym;
+  const sales = S.sales.filter(x => inM(x.date));
+  const recs  = S.records.filter(x => inM(x.date));
+  const exps  = S.expenses.filter(x => inM(x.date));
+  const cash  = sales.reduce((a,x)=>a+num(x.amount),0);
+  const sold  = sales.reduce((a,x)=>a+num(x.eggs),0);
+  const coll  = recs.reduce((a,x)=>a+num(x.eggs),0);
+  const broke = recs.reduce((a,x)=>a+num(x.broken),0);
+  const opex  = exps.filter(x=>x.kind!=='capital').reduce((a,x)=>a+num(x.amount),0);
+  const capex = exps.filter(x=>x.kind==='capital').reduce((a,x)=>a+num(x.amount),0);
+  return { ym, sales, recs, exps, cash, sold, coll, broke, opex, capex,
+           net: cash - opex, unsold: coll - sold - broke,
+           per: sold ? cash/sold : 0 };
+}
+
+function renderBooks(){
+  const ms = months();
+
+  /* ---- P&L table ---- */
+  let tS=0, tO=0, tC=0, tE=0;
+  $('plBody').innerHTML = ms.map(ym => {
+    const b = bookFor(ym);
+    tS+=b.cash; tO+=b.opex; tC+=b.capex; tE+=b.sold;
+    return '<tr><td>' + monthName(ym) + '</td><td>' + R(b.cash) + '</td><td>' + R(b.opex) +
+      '</td><td class="' + (b.net>=0?'pos':'neg') + '">' + R(b.net) + '</td><td>' +
+      (b.capex ? R(b.capex) : '—') + '</td></tr>';
+  }).join('') || '<tr><td colspan="5" class="muted">Nothing recorded yet.</td></tr>';
+  $('plFoot').innerHTML = '<tr><td>Total</td><td>' + R(tS) + '</td><td>' + R(tO) + '</td><td class="' +
+    ((tS-tO)>=0?'pos':'neg') + '">' + R(tS-tO) + '</td><td>' + R(tC) + '</td></tr>';
+
+  $('ttEggs').textContent  = tE.toLocaleString() + ' eggs';
+  $('ttSales').textContent = R(tS);
+  $('ttOpex').textContent  = R(tO);
+  $('ttNet').textContent   = R(tS - tO);
+  $('ttCapex').textContent = R(tC);
+  $('ttRecover').textContent = R(Math.max(0, tC - (tS - tO)));
+
+  const declared = stN('open_capex');
+  const warn = [];
+  if(declared && Math.abs(declared - tC) > 100)
+    warn.push(['gold','⚖️','<b>Capital in the ledger is ' + R(tC) + ', but the figure on file is ' +
+      R(declared) + '.</b> Difference ' + R(Math.abs(declared - tC)) +
+      '. Every rand of capital should exist as a line in the ledger with an invoice behind it.']);
+  if(!S.expenses.some(x => x.category === 'payroll'))
+    warn.push(['gold','👷','<b>No payroll in the ledger.</b> Wages of ' + R(stN('payroll_month')) +
+      ' a month are being paid but never recorded as money out, so every net figure above is flattering.']);
+  $('plWarn').innerHTML = warn.map(w =>
+    '<div class="alert ' + w[0] + '"><span class="ic">' + w[1] + '</span><div>' + w[2] + '</div></div>').join('');
+
+  /* ---- ledger ---- */
+  const filt = $('xFilter') ? $('xFilter').value : 'all';
+  const list = [...S.expenses]
+    .filter(x => filt === 'all' || x.kind === filt)
+    .sort((a,b) => String(b.date).localeCompare(String(a.date)));
+  $('ledgerPill').textContent = list.length + ' entries · ' + R(list.reduce((a,x)=>a+num(x.amount),0));
+  $('ledgerPill').className = 'pill b';
+  $('ledgerBox').innerHTML = list.length ? list.map(x =>
+    '<div class="rec"><span class="d">' + fmtD(x.date) + '</span><span class="m">' +
+    (CAT_ICON[x.category]||'•') + ' <b>' + R2(x.amount) + '</b> · ' + esc(x.description || x.category) +
+    (x.supplier ? ' · ' + esc(x.supplier) : '') + (x.invoice ? ' · inv ' + esc(x.invoice) : '') +
+    (x.kind === 'capital' ? ' <span class="pill b">capital</span>' : '') +
+    '</span></div>').join('') : '<p class="muted">Nothing in the ledger yet.</p>';
+
+  /* ---- reconcile ---- */
+  const sel = $('rcMonth');
+  const keep = sel.value;
+  sel.innerHTML = ms.slice().reverse().map(ym =>
+    '<option value="' + ym + '">' + monthName(ym) + '</option>').join('');
+  if(keep && ms.indexOf(keep) >= 0) sel.value = keep;
+  const ym = sel.value || today().slice(0,7);
+  const b = bookFor(ym);
+
+  $('rcColl').textContent   = b.coll.toLocaleString();
+  $('rcSold').textContent   = b.sold.toLocaleString();
+  $('rcBroken').textContent = b.broke.toLocaleString();
+  $('rcUnsold').textContent = b.unsold.toLocaleString();
+  $('rcCash').textContent   = R2(b.cash);
+  $('rcPer').textContent    = b.per ? R2(b.per) : '—';
+  $('rcOpex').textContent   = R2(b.opex);
+  $('rcNet').textContent    = R2(b.net);
+
+  const f = [];
+  if(b.sold > b.coll && b.coll > 0)
+    f.push(['red','🚨','<b>' + (b.sold - b.coll) + ' more eggs sold than collected.</b> ' +
+      'Usually a prepaid order entered twice — once when the money came in, once when the eggs left. ' +
+      'The sale belongs on the day the eggs LEAVE.']);
+  if(b.coll > 0 && b.unsold > b.coll * 0.25)
+    f.push(['gold','🥚','<b>' + b.unsold + ' eggs unsold this month</b> — ' +
+      Math.round(b.unsold / Math.max(1,b.coll) * 100) + '% of what was collected, about ' +
+      R(b.unsold * stN('tray_price') / stN('tray_size')) + ' that never became cash.']);
+  if(b.sales.length && !b.exps.length)
+    f.push(['gold','🧾','Sales recorded but no costs at all this month. The net figure is not real until the costs are in.']);
+  if(b.per && b.per < stN('tray_price')/stN('tray_size') - 0.15)
+    f.push(['blue','💰','Average taken is ' + R2(b.per) + ' an egg against a tray price of ' +
+      R2(stN('tray_price')/stN('tray_size')) + '. Check for discounts or mis-entered amounts.']);
+  if(!f.length && b.coll)
+    f.push(['green','✅','Eggs and cash tie up for ' + monthName(ym) + '. Nothing obviously wrong.']);
+  $('rcFlags').innerHTML = f.map(x =>
+    '<div class="alert ' + x[0] + '"><span class="ic">' + x[1] + '</span><div>' + x[2] + '</div></div>').join('');
+
+  const rr = [...S.recon].sort((a,b2) => String(b2.period).localeCompare(String(a.period)));
+  $('reconBox').innerHTML = rr.length ? rr.map(r =>
+    '<div class="rec"><span class="d">' + esc(r.period) + '</span><span class="m"><span class="pill ' +
+    (r.status === 'matched' ? 'g' : 'y') + '">' + esc(r.status) + '</span> ' +
+    [r.eggs_note, r.cash_note, r.note].filter(Boolean).map(esc).join('<br>') +
+    '<br><span class="muted">' + esc(r.by) + '</span></span></div>').join('')
+    : '<p class="muted">No sign-offs yet.</p>';
+}
+
+function saveExpense(){
+  if(!can('money')) return toast('Only the CEO or a manager can record money out');
+  const amt = num($('xAmt').value);
+  if(!(amt > 0)) return toast('Enter the amount');
+  if(!$('xDesc').value.trim()) return toast('Say what it was for');
+  queue('expenses', { id:uid('x'), date:$('xDate').value||today(), kind:$('xKind').value,
+    category:$('xCat').value, description:$('xDesc').value.trim(), supplier:$('xSup').value.trim(),
+    invoice:$('xInv').value.trim(), amount:amt, vat:num($('xVat').value), paid:'cash',
+    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  $('xAmt').value=''; $('xDesc').value=''; $('xInv').value=''; $('xVat').value=0;
+  toast('Added to the ledger');
+}
+
+function saveRecon(){
+  if(!can('recon')) return toast('Only the CEO, a manager or the accountant can sign off');
+  const ym = $('rcMonth').value || today().slice(0,7);
+  const b = bookFor(ym);
+  queue('recon', { id:uid('r'), period:ym, status:$('rcStatus').value,
+    eggs_note: b.coll + ' collected, ' + b.sold + ' sold, ' + b.unsold + ' unsold',
+    cash_note: R2(b.cash) + ' banked, ' + R2(b.opex) + ' costs, net ' + R2(b.net),
+    note:$('rcNote').value.trim(), by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  $('rcNote').value='';
+  toast(monthName(ym) + ' signed off');
+}
+
 /* ---------- team ---------- */
 async function loadTeam(quiet){
   if(!isAdmin()) return;
@@ -1667,7 +1957,7 @@ function renderSetup(){
   });
 
   /* date defaults */
-  ['tDate','sDate','wDate','hDate','fDate','waDate'].forEach(id => { if($(id) && !$(id).value) $(id).value = today(); });
+  ['tDate','sDate','wDate','hDate','fDate','waDate','xDate'].forEach(id => { if($(id) && !$(id).value) $(id).value = today(); });
   if($('fPrice') && !$('fPrice').value) $('fPrice').value = stN('bag_price');
   priceSale();
 }
@@ -1763,12 +2053,14 @@ function applyRole(){
     if(el.querySelector('.btn')) el.classList.toggle('locked', !write);
   });
   document.querySelectorAll('#v-setup .card.admin').forEach(el => el.classList.toggle('locked', !admin));
+  document.querySelectorAll('.money-only').forEach(el => el.classList.toggle('locked', !can('money')));
+  document.querySelectorAll('.recon-only').forEach(el => el.classList.toggle('locked', !can('recon')));
   document.querySelector('nav button[data-v="team"]').style.display = isAdmin() ? '' : 'none';
   if(!isAdmin() && $('v-team').classList.contains('on')) go('home');
 }
 function renderAll(){
   try{
-    renderHome(); renderLists(); renderMoney(); renderSetup(); applyRole();
+    renderHome(); renderLists(); renderMoney(); renderBooks(); renderSetup(); applyRole();
   }catch(e){ console.error('render', e); }
 }
 function go(v){
@@ -1779,6 +2071,13 @@ function go(v){
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => go(b.dataset.v));
+document.querySelectorAll('#bookTabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#bookTabs button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelectorAll('.bsec').forEach(x => x.classList.remove('on'));
+  $('b-'+b.dataset.b).classList.add('on');
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
 document.querySelectorAll('#recTabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#recTabs button').forEach(x => x.classList.remove('on'));
   b.classList.add('on');
