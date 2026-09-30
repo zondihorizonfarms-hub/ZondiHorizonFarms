@@ -49,7 +49,7 @@ header{position:sticky;top:0;z-index:40;background:var(--deep);color:#fff;
 .rolechip{display:inline-block;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.14);
   color:#fff;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 
-main{padding:12px 12px 6px;max-width:640px;margin:0 auto}
+main{padding:12px 12px 6px;max-width:680px;margin:0 auto}
 .view{display:none}.view.on{display:block;animation:fade .18s ease}
 .rsec{display:none}.rsec.on{display:block;animation:fade .18s ease}
 .bsec{display:none}.bsec.on{display:block;animation:fade .18s ease}
@@ -124,11 +124,24 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#f
 .stepper input{border-radius:0;border-left:none;border-right:none;text-align:center;
   font-size:20px;font-weight:680;padding:10px 4px}
 
-.segs{display:flex;gap:5px;overflow-x:auto;padding-bottom:9px;margin-bottom:2px;scrollbar-width:none}
+.segs{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:9px;margin-bottom:2px}
 .segs::-webkit-scrollbar{display:none}
 .segs button{flex:none;padding:8px 13px;border-radius:99px;border:1.5px solid var(--line);
   background:var(--card);font-size:13px;font-weight:640;color:var(--ink-2);cursor:pointer}
 .segs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.usec{display:none}.usec.on{display:block}
+.item{border-bottom:1px solid var(--line);padding:11px 0}
+.item:last-child{border-bottom:none}
+.item .top{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.item .top .nm{flex:1;min-width:0;font-weight:650;font-size:14px;line-height:1.35}
+.item .top .amt{flex:none;font-size:13px;font-weight:650;text-align:right;white-space:nowrap}
+.item .meta{font-size:12px;color:var(--ink-3);margin-top:4px;line-height:1.45}
+.item .why{font-size:12.5px;color:var(--ink-2);margin-top:5px;line-height:1.5}
+.item .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.item .hist{font-size:11.5px;color:var(--ink-3);margin-top:6px;border-left:2px solid var(--line);padding-left:8px}
+.item .ed{margin-top:10px;background:var(--bg);border-radius:12px;padding:10px}
+.item a{color:var(--blue)}
+.chk a,.help-card a,#t-daily a,#t-health a{color:var(--accent);font-weight:640;text-decoration:none}
 
 .rec{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
 .rec:last-child{border:none}
@@ -222,6 +235,202 @@ nav button.on{color:var(--accent)}
 hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 .locked{opacity:.45;pointer-events:none}
 
+
+/* =====================================================================
+   FITS EVERY SCREEN
+   Phones  (<700px)   one column, bottom bar, "More" sheet
+   Tablets (700–1023) two-column card grid, bottom bar
+   Desktop (≥1024px)  sidebar menu, auto-filling card grid
+   ===================================================================== */
+html,body{max-width:100%}
+body{overflow-x:clip}
+img,svg,video{max-width:100%}
+.card,.tile,.line,.rec,.member .who{min-width:0}
+.card,.tile,.alert,.rec .m,.lines b{overflow-wrap:anywhere}
+input,select,textarea{min-width:0;max-width:100%}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{min-width:0}
+
+/* ---- side menu (desktop only) ---- */
+#side{display:none}
+.side-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.side-brand img{width:40px;height:40px;border-radius:11px;background:#faf7f1;flex:none}
+.side-brand b{display:block;font-size:15px}
+.side-brand small{display:block;font-size:11px;color:#b9cca6}
+#side button{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;
+  color:#d7e4cc;font-size:14.5px;font-weight:600;padding:11px 12px;border-radius:11px;cursor:pointer;
+  text-align:left;position:relative}
+#side button:hover{background:rgba(255,255,255,.08)}
+#side button.on{background:rgba(255,255,255,.16);color:#fff}
+#side .ic{font-size:18px;width:22px;text-align:center}
+#side .badge{position:static;margin-left:auto}
+.side-sep{height:1px;background:rgba(255,255,255,.14);margin:10px 6px}
+.side-foot{margin-top:auto;padding:14px 8px 4px;font-size:11px;color:#9fb593;line-height:1.5}
+
+/* ---- "More" sheet (phones & tablets) ---- */
+.sheet{position:fixed;inset:0;z-index:120;background:rgba(31,23,11,.42);display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex}
+.sheet-card{background:var(--card);width:100%;max-width:560px;border-radius:20px 20px 0 0;
+  padding:8px 12px calc(16px + env(safe-area-inset-bottom));animation:sheetUp .22s ease}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet-grip{width:42px;height:4px;border-radius:99px;background:var(--line);margin:6px auto 12px}
+.sheet-card button{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:none;
+  border:none;padding:13px 10px;border-radius:13px;cursor:pointer;position:relative}
+.sheet-card button:active,.sheet-card button:hover{background:var(--accent-soft)}
+.sheet-card .ic{font-size:23px;width:32px;text-align:center;flex:none}
+.sheet-card .st{flex:1;min-width:0}
+.sheet-card b{display:block;font-size:15.5px}
+.sheet-card small{display:block;color:var(--ink-3);font-size:12.5px;line-height:1.35}
+.sheet-card .badge{position:static;flex:none}
+nav#bottom .badge{top:3px}
+
+/* ---- tooltips ---- */
+[data-tip]{cursor:help}
+.ti{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:99px;margin-left:5px;
+  background:var(--blue-soft);color:var(--blue);font:700 11px/1 -apple-system,Segoe UI,Roboto,sans-serif;
+  border:none;cursor:pointer;vertical-align:middle;text-transform:none;letter-spacing:0;flex:none;padding:0}
+.hero .ti{background:rgba(255,255,255,.2);color:#fff}
+.tip-pop{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(12px);
+  width:min(92vw,420px);background:var(--ink);color:#fff;border-radius:16px;padding:15px 15px 12px;
+  z-index:140;box-shadow:0 12px 36px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:.2s;font-size:14px;line-height:1.5}
+.tip-pop.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.tip-pop b{color:#ffd59e}
+.tip-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:11px}
+.tip-acts .btn{width:auto;padding:8px 14px}
+.tip-acts .btn.ghost{color:#fff;border-color:rgba(255,255,255,.3)}
+
+/* ---- checklists ---- */
+.chk{display:flex;gap:12px;align-items:flex-start;padding:12px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.chk:last-child{border:none}
+.chk .box{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);flex:none;display:grid;
+  place-items:center;font-size:16px;color:#fff;background:#fcfbf8;transition:.15s;margin-top:1px}
+.chk.done .box{background:var(--accent);border-color:var(--accent)}
+.chk.done .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25)}
+.chk.today{background:var(--gold-soft);border-radius:12px;padding:12px 8px;border-bottom-color:transparent}
+.chk .body{flex:1;min-width:0}
+.chk .t{font-weight:640;font-size:14.5px;line-height:1.35}
+.chk .d{font-size:12.5px;color:var(--ink-2);margin-top:2px;line-height:1.45}
+.chk .who{font-size:11.5px;color:var(--accent);font-weight:600;margin-top:4px}
+.chk .when{font-size:11.5px;font-weight:700;color:var(--ink-3);flex:none;padding-top:5px;min-width:40px;text-align:right}
+.chk.locked-row{cursor:default}
+.prog{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0 2px}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.due{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;flex:none}
+.due.ok{background:var(--accent-soft);color:var(--accent)}
+.due.soon{background:var(--gold-soft);color:#8a6209}
+.due.late{background:var(--red-soft);color:var(--red)}
+.due.none{background:var(--blue-soft);color:var(--blue)}
+
+/* ---- knowledge & help ---- */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips button{border:1.5px solid var(--line);background:#fcfbf8;border-radius:99px;padding:6px 11px;
+  font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.kb-item{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:12px 13px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh)}
+.kb-item.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.kb-item b{display:block;font-size:14.5px;line-height:1.3}
+.kb-item span{display:block;font-size:12px;color:var(--ink-3);margin-top:3px;line-height:1.4}
+.kb-item .cat{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--accent);margin:0 0 3px}
+.kb-art{display:none}
+.kb-art.on{display:block}
+.kb-art h1{font-size:21px;margin:2px 0 6px;letter-spacing:-.02em}
+.kb-art h3{font-size:15px;margin:18px 0 6px}
+.kb-art p,.kb-art li{font-size:14.5px;line-height:1.6;color:var(--ink)}
+.kb-art ul,.kb-art ol{padding-left:20px;margin:6px 0}
+.kb-art li{margin:3px 0}
+.kb-art table{margin:8px 0;font-size:13px}
+.kb-art .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.kb-art .tw table{min-width:100%;border-collapse:collapse}
+.kb-art th,.kb-art td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.kb-art th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3)}
+.kb-art p,.kb-art li{overflow-wrap:break-word}
+.kb-art td{min-width:64px}
+.kb-art .src{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-3);line-height:1.6}
+.kb-art .src a{color:var(--blue);overflow-wrap:anywhere}
+.kb-art .note{background:var(--gold-soft);border:1px solid #f0e0bb;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13.5px;color:#6b4e0c}
+.kb-art .law{background:var(--blue-soft);border:1px solid #c9dcea;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13.5px;color:#1f4665}
+.kb-art .alarm{background:var(--red-soft);border:1px solid #f0cfc7;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13.5px;color:#7d2b1c}
+.kb-back{display:none;background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;padding:0 0 10px;cursor:pointer}
+.help-card h3{font-size:15px;margin:0 0 6px}
+.help-card p,.help-card li{font-size:14px;line-height:1.55}
+.help-card ol,.help-card ul{padding-left:19px;margin:6px 0}
+.help-card .go{margin-top:8px}
+
+/* phone: knowledge shows list OR article, not both */
+@media (max-width:1023px){
+  .kb-wrap.reading #kbList{display:none}
+  .kb-wrap.reading .kb-back{display:block}
+}
+
+/* ---- very small phones ---- */
+@media (max-width:370px){
+  main{padding:10px 8px 6px}
+  .card{padding:12px 11px}
+  .f3{grid-template-columns:1fr 1fr}
+  .f3 > .field:last-child{grid-column:1 / -1}
+  .tile .v{font-size:19px}
+  .tgt{gap:10px}
+  .tgt .info .big{font-size:22px}
+  nav#bottom button{font-size:9px}
+  .brand h1{font-size:14px}
+  .hdr-r{display:none}
+  .segs button{padding:7px 10px;font-size:12.5px}
+}
+
+/* ---- tablets: two columns ---- */
+@media (min-width:700px){
+  main{max-width:1040px;padding:16px 20px 10px}
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .view.on:not(.has-sub),.rsec.on,.bsec.on,.tsec.on,.span-grid{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+  .span-grid{grid-column:1 / -1}
+  .view.on:not(.has-sub) > .card,.rsec.on > .card,.bsec.on > .card,.tsec.on > .card,.span-grid > .card{margin-bottom:0}
+  .span,#alerts,.view > .hero,.view > .grid,#v-home > .hero{grid-column:1 / -1}
+  .segs{margin-bottom:12px}
+  .kb-top{margin-bottom:12px}
+  .tip-pop{bottom:96px}
+}
+
+/* ---- desktop: sidebar ---- */
+@media (min-width:1024px){
+  body{padding-bottom:0;padding-left:240px}
+  #side{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:240px;
+    background:var(--deep);color:#fff;padding:18px 12px;z-index:60;overflow-y:auto}
+  nav#bottom,.sheet{display:none !important}
+  header{padding-left:24px;padding-right:24px}
+  header .brand img{display:none}
+  .syncbar{padding-left:24px;padding-right:24px}
+  main{max-width:1240px;padding:22px 28px 30px}
+  .view.on:not(.has-sub),.rsec.on,.bsec.on,.tsec.on,.span-grid{
+    grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+  .kb-wrap{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:14px;align-items:start}
+  #kbList{position:sticky;top:120px;max-height:calc(100vh - 140px);overflow-y:auto;padding-right:4px}
+  .kb-art{display:block}
+  .toast{bottom:28px}
+  .tip-pop{bottom:28px;left:calc(50% + 120px)}
+  #gate .wrap{max-width:420px}
+}
+
+/* ---- large desktop ---- */
+@media (min-width:1500px){
+  main{max-width:1400px}
+}
+
+/* ---- landscape phones: don't waste the short screen ---- */
+@media (max-height:500px) and (orientation:landscape){
+  header{padding-top:6px;padding-bottom:6px}
+  .brand img{width:28px;height:28px}
+  nav#bottom button{padding:5px 2px 4px}
+}
+
+@media print{
+  #side,nav#bottom,.syncbar,header,.segs,.btn,.tip-pop{display:none !important}
+  body{padding:0;background:#fff}
+  .card{box-shadow:none;break-inside:avoid}
+}
+
 </style>
 </head>
 <body>
@@ -277,7 +486,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
       <div class="field"><label>Again</label>
         <input type="password" id="gPin2" class="pin" inputmode="numeric" maxlength="6" placeholder="••••"></div>
     </div>
-    <div class="field"><label>Invite code (if you have one)</label>
+    <div class="field"><label data-tip="invite">Invite code (if you have one)</label>
       <input type="text" id="gCode" placeholder="ZH-XXXXX" style="text-transform:uppercase"></div>
     <button class="btn" onclick="doSignup()">Create account</button>
     <button class="link" onclick="pane('welcome')">Back</button>
@@ -332,7 +541,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
   <div id="alerts"></div>
 
   <div class="card hero">
-    <h2>This week against target</h2>
+    <h2 data-tip="target">This week against target</h2>
     <div class="tgt">
       <div class="ring">
         <svg width="96" height="96">
@@ -351,13 +560,13 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 
   <div class="grid">
     <div class="tile"><div class="k">Eggs today</div><div class="v" id="kEggs">—</div><div class="s" id="kEggsSub">—</div></div>
-    <div class="tile"><div class="k">Lay rate</div><div class="v" id="kLay">—</div><div class="s" id="kLaySub">—</div></div>
-    <div class="tile"><div class="k">Unsold stock</div><div class="v" id="kStock">—</div><div class="s" id="kStockSub">—</div></div>
+    <div class="tile"><div class="k" data-tip="lay">Lay rate</div><div class="v" id="kLay">—</div><div class="s" id="kLaySub">—</div></div>
+    <div class="tile"><div class="k" data-tip="unsold">Unsold stock</div><div class="v" id="kStock">—</div><div class="s" id="kStockSub">—</div></div>
     <div class="tile"><div class="k">Birds</div><div class="v" id="kBirds">—</div><div class="s" id="kBirdsSub">—</div></div>
   </div>
 
   <div class="card">
-    <h2>Feed tank <span class="pill" id="feedPill">—</span></h2>
+    <h2 data-tip="feedtank">Feed tank <span class="pill" id="feedPill">—</span></h2>
     <div class="gauge">
       <div class="ring2">
         <svg width="86" height="86">
@@ -393,13 +602,14 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 </section>
 
 <!-- ============ RECORD ============ -->
-<section class="view" id="v-rec">
+<section class="view has-sub" id="v-rec">
   <div class="segs" id="recTabs">
     <button class="on" data-r="today">🥚 Today</button>
     <button data-r="sales">💰 Sales</button>
     <button data-r="weights">⚖️ Weights</button>
     <button data-r="health">🩺 Health</button>
     <button data-r="feed">🌾 Feed &amp; water</button>
+    <button data-r="visitors">🚪 Visitors</button>
   </div>
 
   <div class="rsec on" id="r-today">
@@ -414,8 +624,8 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
         </div>
       </div>
       <div class="f3">
-        <div class="field"><label>Broken</label><input type="number" id="tBroken" value="0" min="0" inputmode="numeric"></div>
-        <div class="field"><label>Feed kg</label><input type="number" id="tFeed" step="0.5" inputmode="decimal" placeholder="auto"></div>
+        <div class="field"><label data-tip="broken">Broken</label><input type="number" id="tBroken" value="0" min="0" inputmode="numeric"></div>
+        <div class="field"><label data-tip="feedkg">Feed kg</label><input type="number" id="tFeed" step="0.5" inputmode="decimal" placeholder="auto"></div>
         <div class="field"><label>Water L</label><input type="number" id="tWater" step="1" inputmode="numeric" placeholder="—"></div>
       </div>
       <div class="field"><label>Notes</label><input type="text" id="tNote" placeholder="e.g. very hot, 2 soft shells"></div>
@@ -431,18 +641,18 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
       <h2>Record a sale</h2>
       <div class="f2">
         <div class="field"><label>Date</label><input type="date" id="sDate"></div>
-        <div class="field"><label>Customer</label>
+        <div class="field"><label data-tip="customer">Customer</label>
           <input type="text" id="sCust" list="custList" placeholder="Name — not 'walk in'">
           <datalist id="custList"></datalist></div>
       </div>
       <div class="f2">
-        <div class="field"><label>Trays (<span id="traySize">30</span>)</label>
+        <div class="field"><label data-tip="trays">Trays (<span id="traySize">30</span>)</label>
           <div class="stepper">
             <button onclick="bump('sTrays',-1)">−</button>
             <input type="number" id="sTrays" value="0" min="0" inputmode="numeric">
             <button onclick="bump('sTrays',1)">+</button>
           </div></div>
-        <div class="field"><label>Loose eggs</label>
+        <div class="field"><label data-tip="singles">Loose eggs</label>
           <div class="stepper">
             <button onclick="bump('sSingles',-1)">−</button>
             <input type="number" id="sSingles" value="0" min="0" inputmode="numeric">
@@ -475,8 +685,8 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
         <div class="field"><label>Batch</label><select id="wBatch"></select></div>
       </div>
       <div class="f2">
-        <div class="field"><label>Tag number</label><input type="text" id="wTag" inputmode="numeric" placeholder="006"></div>
-        <div class="field"><label>Weight (kg)</label><input type="number" id="wKg" step="0.01" inputmode="decimal" placeholder="1.85"></div>
+        <div class="field"><label data-tip="tag">Tag number</label><input type="text" id="wTag" inputmode="numeric" placeholder="006"></div>
+        <div class="field"><label data-tip="weight">Weight (kg)</label><input type="number" id="wKg" step="0.01" inputmode="decimal" placeholder="1.85"></div>
       </div>
       <div id="wVerdict"></div>
       <button class="btn" onclick="saveWeight()">Add weight</button>
@@ -503,7 +713,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
       </div>
       <div class="f2">
         <div class="field"><label>Treatment used</label><input type="text" id="hTreat" placeholder="e.g. Terramycin"></div>
-        <div class="field"><label>Withdrawal days</label><input type="number" id="hDays" value="0" min="0" inputmode="numeric"></div>
+        <div class="field"><label data-tip="withdraw">Withdrawal days</label><input type="number" id="hDays" value="0" min="0" inputmode="numeric"></div>
       </div>
       <div class="field"><label>Notes</label><input type="text" id="hNote" placeholder="symptoms, which cage"></div>
       <div id="hWarn"></div>
@@ -538,11 +748,34 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <div class="card"><h2>Feed history</h2><div id="listFeed"></div></div>
     <div class="card"><h2>Water history</h2><div id="listWater"></div></div>
   </div>
+
+  <div class="rsec" id="r-visitors">
+    <div class="card">
+      <h2 data-tip="biosec">Visitor register</h2>
+      <p class="muted" style="margin:0 0 10px">Form 9 · biosecurity. Everyone who enters the
+        poultry house signs in here and dips their boots in the footbath.</p>
+      <div class="f2">
+        <div class="field"><label>Date</label><input type="date" id="vDate"></div>
+        <div class="field"><label>Name</label><input type="text" id="vName" placeholder="Full name"></div>
+      </div>
+      <div class="field"><label>Reason for visit</label>
+        <input type="text" id="vReason" placeholder="e.g. feed delivery, vet, buyer"></div>
+      <div class="f2">
+        <div class="field"><label data-tip="ownpoultry">Keeps poultry at home?</label>
+          <select id="vOwn"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div class="field"><label data-tip="footbath">Used the footbath?</label>
+          <select id="vFoot"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      </div>
+      <div id="vWarn"></div>
+      <button class="btn" onclick="saveVisitor()">Sign them in</button>
+    </div>
+    <div class="card"><h2>Recent visitors</h2><div id="listVisitors"></div></div>
+  </div>
 </section>
 
 <!-- ============ MONEY ============ -->
 <!-- ============ BOOKS ============ -->
-<section class="view" id="v-money">
+<section class="view has-sub" id="v-money">
   <div class="segs" id="bookTabs">
     <button class="on" data-b="pl">📘 Profit &amp; loss</button>
     <button data-b="price">💰 Price</button>
@@ -580,7 +813,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     </div>
 
     <div class="card">
-      <h2>Break-even <span class="pill" id="beChip">—</span></h2>
+      <h2 data-tip="breakeven">Break-even <span class="pill" id="beChip">—</span></h2>
       <p class="muted" style="margin:-4px 0 10px" id="costNote"></p>
       <div class="lines">
         <div class="line"><span>Feed</span><b id="cFeed">—</b></div>
@@ -637,7 +870,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
         <div class="field"><label>Amount (R)</label><input type="number" id="xAmt" step="0.01" inputmode="decimal"></div>
       </div>
       <div class="f2">
-        <div class="field"><label>Type</label>
+        <div class="field"><label data-tip="capital">Type</label>
           <select id="xKind">
             <option value="operating">Running cost</option>
             <option value="capital">Capital (cages, build, birds)</option>
@@ -675,7 +908,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
   <!-- ---- reconcile ---- -->
   <div class="bsec" id="b-recon">
     <div class="card">
-      <h2>Reconcile a month</h2>
+      <h2 data-tip="recon">Reconcile a month</h2>
       <div class="field"><label>Month</label><select id="rcMonth" onchange="renderBooks()"></select></div>
       <div class="lines">
         <div class="line"><span>Eggs collected</span><b id="rcColl">—</b></div>
@@ -712,6 +945,116 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
   </div>
 </section>
 
+<!-- ============ TASKS ============ -->
+<section class="view has-sub" id="v-tasks">
+  <div class="segs" id="taskTabs">
+    <button class="on" data-t="daily">☀️ Today</button>
+    <button data-t="weekly">📅 This week</button>
+    <button data-t="monthly">🗓️ This month</button>
+    <button data-t="health">💉 Health</button>
+    <button data-t="batch">🐔 Batch</button>
+  </div>
+  <div class="tsec on" id="t-daily"></div>
+  <div class="tsec" id="t-weekly"></div>
+  <div class="tsec" id="t-monthly"></div>
+  <div class="tsec" id="t-health"></div>
+  <div class="tsec" id="t-batch"></div>
+</section>
+
+<!-- ============ KNOWLEDGE ============ -->
+<section class="view has-sub" id="v-kb">
+  <div class="card kb-top">
+    <h2>Layer farming knowledge <span class="pill g" id="kbCount">—</span></h2>
+    <input type="search" id="kbQ" placeholder="Search — mites, heat, Newcastle, egg sizes, lighting…" autocomplete="off">
+    <div class="chips" id="kbCats"></div>
+  </div>
+  <div class="kb-wrap">
+    <div id="kbList"></div>
+    <article class="card kb-art" id="kbArticle"></article>
+  </div>
+</section>
+
+<!-- ============ HELP ============ -->
+<section class="view" id="v-help">
+  <div class="card span help-top">
+    <h2>Help</h2>
+    <input type="search" id="helpQ" placeholder="What do you need help with?" autocomplete="off">
+    <p class="muted" style="margin:8px 0 0" id="helpVer"></p>
+  </div>
+  <div id="helpBox" class="span-grid"></div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<!-- ============ BUYING LIST & SUPPLIERS ============ -->
+<section class="view has-sub" id="v-buy">
+  <div class="segs" id="buyTabs">
+    <button class="on" data-u="list">🛒 Buying list</button>
+    <button data-u="sup">🏪 Suppliers</button>
+  </div>
+
+  <div class="usec on" id="u-list">
+    <div class="card">
+      <h2 data-tip="buylist">The buying list <span class="pill" id="buyPill">—</span></h2>
+      <p class="muted" style="margin:-4px 0 10px">Everything the farm needs, from the day-one paper list onward —
+        what it costs, where to get it, whether we have it, and why. Every change is kept with the name and date.</p>
+      <div class="lines" id="buySum"></div>
+      <div class="segs" id="buyFilter" style="margin-top:10px">
+        <button class="on" data-f="open">To buy</button>
+        <button data-f="quoted">Quotes</button>
+        <button data-f="bought">Have it</button>
+        <button data-f="all">Everything</button>
+      </div>
+    </div>
+    <div id="buyList"></div>
+    <div class="card write-only" id="buyAddCard">
+      <h2>Add something to the list</h2>
+      <div class="field"><label>What</label><input type="text" id="bItem" placeholder="e.g. Second feed bin"></div>
+      <div class="f3">
+        <div class="field"><label>Qty</label><input type="text" id="bQty" placeholder="1"></div>
+        <div class="field"><label>From R</label><input type="number" id="bLo" inputmode="decimal"></div>
+        <div class="field"><label>To R</label><input type="number" id="bHi" inputmode="decimal"></div>
+      </div>
+      <div class="f2">
+        <div class="field"><label data-tip="counter">Where it is sold</label><select id="bCat"></select></div>
+        <div class="field"><label>When</label><select id="bPri"></select></div>
+      </div>
+      <div class="field"><label>Why we need it</label><input type="text" id="bNote" placeholder="What it is for"></div>
+      <button class="btn" onclick="addPurchase()">Add to the list</button>
+    </div>
+  </div>
+
+  <div class="usec" id="u-sup">
+    <div class="card">
+      <h2 data-tip="suppliers">Supplier book <span class="pill" id="supPill">—</span></h2>
+      <p class="muted" style="margin:-4px 0 10px">Who we buy from, who quoted us, who else there is — and why we chose
+        them. Tap a phone number to call.</p>
+      <div class="segs" id="supFilter">
+        <button class="on" data-f="all">All</button>
+        <button data-f="used">Used</button>
+        <button data-f="quoted">Quoted</button>
+        <button data-f="option">Options</button>
+      </div>
+    </div>
+    <div id="supList"></div>
+    <div class="card write-only">
+      <h2>Add a supplier</h2>
+      <div class="f2">
+        <div class="field"><label>Name</label><input type="text" id="sName"></div>
+        <div class="field"><label>What they sell</label><input type="text" id="sCat" placeholder="Feed, cages, vet…"></div>
+      </div>
+      <div class="field"><label>Phone, email or website</label><input type="text" id="sContact"></div>
+      <div class="f2">
+        <div class="field"><label>Where</label><input type="text" id="sLoc"></div>
+        <div class="field"><label>Status</label><select id="sStatus">
+          <option value="option">An option</option><option value="quoted">Quoted us</option>
+          <option value="used">We buy here</option><option value="avoid">Avoid</option></select></div>
+      </div>
+      <div class="field"><label>Why — what we use them for, or why not</label><input type="text" id="sWhy"></div>
+      <button class="btn" onclick="addSupplier()">Save supplier</button>
+    </div>
+  </div>
+</section>
+
 <section class="view" id="v-team">
   <div class="card" id="teamCard">
     <h2>Team <span class="pill" id="teamPill"></span></h2>
@@ -719,7 +1062,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <div id="memberBox"><p class="muted">Loading…</p></div>
   </div>
   <div class="card" id="codeCard">
-    <h2>Invite codes</h2>
+    <h2 data-tip="invite">Invite codes</h2>
     <p class="muted" style="margin:0 0 10px">Make a code, send it with the app link. Whoever signs up
       with it goes straight in — no waiting screen.</p>
     <div class="f2">
@@ -735,7 +1078,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <div id="codeBox"></div>
   </div>
   <div class="card">
-    <h2>Who can do what</h2>
+    <h2 data-tip="roles">Who can do what</h2>
     <div style="overflow-x:auto">
       <table>
         <thead><tr><th>Role</th><th>Record</th><th>Settings</th><th>Team</th></tr></thead>
@@ -810,7 +1153,7 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <div class="f3">
       <div class="field"><label>Bag kg</label><input type="number" id="pBagKg" inputmode="numeric"></div>
       <div class="field"><label>Bag price (R)</label><input type="number" id="pBagPrice" step="1" inputmode="decimal"></div>
-      <div class="field"><label>g/bird/day</label><input type="number" id="pGrams" inputmode="numeric"></div>
+      <div class="field"><label data-tip="grams">g/bird/day</label><input type="number" id="pGrams" inputmode="numeric"></div>
     </div>
     <div class="f3">
       <div class="field"><label>Payroll /mo</label><input type="number" id="pPayroll" inputmode="numeric"></div>
@@ -819,10 +1162,24 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     </div>
     <div class="f2">
       <div class="field"><label>Weekly target (R)</label><input type="number" id="pTargetWk" inputmode="numeric"></div>
-      <div class="field"><label>Order feed at (days left)</label><input type="number" id="pLead" inputmode="numeric"></div>
+      <div class="field"><label data-tip="lead">Order feed at (days left)</label><input type="number" id="pLead" inputmode="numeric"></div>
     </div>
     <div class="field"><label>Capital invested to date (R)</label><input type="number" id="pCapex" inputmode="decimal"></div>
     <button class="btn" onclick="saveSettings()">Save costs</button>
+  </div>
+
+  <div class="card admin">
+    <h2>Health programme</h2>
+    <p class="muted" style="margin:-4px 0 10px">How often each job comes due on the Tasks screen, in days. Set them with your vet.</p>
+    <div class="f2">
+      <div class="field"><label data-tip="ndint">Newcastle booster</label><input type="number" id="pND" min="7" inputmode="numeric"></div>
+      <div class="field"><label>Deworming</label><input type="number" id="pWorm" min="7" inputmode="numeric"></div>
+    </div>
+    <div class="f2">
+      <div class="field"><label>Mite / lice check</label><input type="number" id="pMite" min="1" inputmode="numeric"></div>
+      <div class="field"><label>Weigh sample birds</label><input type="number" id="pWeigh" min="1" inputmode="numeric"></div>
+    </div>
+    <button class="btn" onclick="saveSettings()">Save health programme</button>
   </div>
 
   <div class="card">
@@ -830,6 +1187,8 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
     <div class="btn-row">
       <button class="btn ghost sm" onclick="exportCSV('records')">📄 Daily CSV</button>
       <button class="btn ghost sm" onclick="exportCSV('sales')">📄 Sales CSV</button>
+      <button class="btn ghost sm" onclick="exportCSV('purchases')">📄 Buying list CSV</button>
+      <button class="btn ghost sm" onclick="exportCSV('suppliers')">📄 Suppliers CSV</button>
     </div>
     <div class="sp"></div>
     <button class="btn ghost sm" onclick="exportAll()">⬇ Full backup (JSON)</button>
@@ -839,22 +1198,56 @@ hr{border:none;border-top:1px solid var(--line);margin:13px 0}
 
 </main>
 
-<nav>
+<aside id="side" aria-label="Main menu">
+  <div class="side-brand"><img id="sideLogo" alt=""><div><b>Zondi Horizon</b><small>Flock Tracker</small></div></div>
   <button class="on" data-v="home"><span class="ic">📊</span>Home</button>
   <button data-v="rec"><span class="ic">✍️</span>Record</button>
+  <button data-v="tasks"><span class="ic">✅</span>Tasks<span class="badge sb-tasks" style="display:none"></span></button>
   <button data-v="money"><span class="ic">📘</span>Books</button>
-  <button data-v="team"><span class="ic">👥</span>Team<span class="badge" id="navBadge" style="display:none">0</span></button>
+  <button data-v="buy"><span class="ic">🛒</span>Buying</button>
+  <div class="side-sep"></div>
+  <button data-v="kb"><span class="ic">📚</span>Knowledge</button>
+  <button data-v="help"><span class="ic">❓</span>Help</button>
+  <button data-v="team" class="adm"><span class="ic">👥</span>Team<span class="badge sb-team" style="display:none"></span></button>
   <button data-v="setup"><span class="ic">⚙️</span>Setup</button>
+  <div class="side-foot" id="sideFoot"></div>
+</aside>
+
+<nav id="bottom" aria-label="Main menu">
+  <button class="on" data-v="home"><span class="ic">📊</span>Home</button>
+  <button data-v="rec"><span class="ic">✍️</span>Record</button>
+  <button data-v="tasks"><span class="ic">✅</span>Tasks<span class="badge sb-tasks" style="display:none"></span></button>
+  <button data-v="money"><span class="ic">📘</span>Books</button>
+  <button data-v="more"><span class="ic">☰</span>More<span class="badge sb-team" style="display:none"></span></button>
 </nav>
+
+<div id="sheet" class="sheet" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet-card">
+    <div class="sheet-grip"></div>
+    <button data-v="buy"><span class="ic">🛒</span><span class="st"><b>Buying &amp; suppliers</b><small>The buying list from day one, quotes, and every supplier — and why</small></span></button>
+    <button data-v="kb"><span class="ic">📚</span><span class="st"><b>Knowledge</b><small>Everything layers — health, feed, housing, the law</small></span></button>
+    <button data-v="help"><span class="ic">❓</span><span class="st"><b>Help</b><small>How to use the app, and answers to common problems</small></span></button>
+    <button data-v="team" class="adm"><span class="ic">👥</span><span class="st"><b>Team</b><small>People, roles and invite codes</small></span><span class="badge sb-team" style="display:none"></span></button>
+    <button data-v="setup"><span class="ic">⚙️</span><span class="st"><b>Setup</b><small>Flock, prices, costs, install, your account</small></span></button>
+  </div>
+</div>
+
+<div id="tipPop" class="tip-pop" role="dialog" aria-live="polite">
+  <div id="tipBody"></div>
+  <div class="tip-acts"><button class="btn sm ghost" id="tipMore" style="display:none">Read more</button>
+  <button class="btn sm" onclick="hideTip()">Got it</button></div>
+</div>
 
 <div class="toast" id="toast"></div>
 
+<script src="kb.js"></script>
 <script>
 /* ==========================================================
    ZONDI HORIZON FLOCK TRACKER — September 2026
    Owner: paste the Apps Script /exec link below, save, upload.
    ========================================================== */
 const FARM_URL = "https://script.google.com/macros/s/AKfycbzlbNrQGhDzznik74aCiFhxYZzTwHXK8xGJBaBMwItPAMzn-QlJRwAK66lzBWTG40xw/exec";
+const APP_VERSION = '3.2';
 
 const COUNTRIES = [
   ['ZA','🇿🇦','27','South Africa'], ['GB','🇬🇧','44','United Kingdom'], ['ZW','🇿🇼','263','Zimbabwe'],
@@ -900,11 +1293,13 @@ const DEF = {
     tray_size:30, tray_price:60, single_price:2.5, target_tray_price:70,
     bag_kg:50, bag_price:390, grams_per_bird:125, lead_days:5,
     weekly_target:2436, payroll_month:2700, water_month:0, other_month:1000,
-    open_eggs:513, open_sold:513, open_rand:1066.5, open_capex:78564.43, open_feed_kg:112.5
+    open_eggs:513, open_sold:513, open_rand:1066.5, open_capex:78564.43, open_feed_kg:112.5,
+    nd_interval:60, deworm_interval:75, mite_interval:30, weigh_interval:30
   },
   records:[], sales:[], weights:[], health:[], feed:[], water:[], customers:[],
-  expenses:[], recon:[],
-  q:{ records:[], sales:[], weights:[], health:[], feed:[], water:[], expenses:[], recon:[] },
+  expenses:[], recon:[], checks:[], visitors:[], purchases:[], suppliers:[],
+  q:{ records:[], sales:[], weights:[], health:[], feed:[], water:[], expenses:[], recon:[], checks:[], visitors:[],
+      purchases:[], suppliers:[] },
   settingsDirty:false, lastSync:0, pending:0
 };
 
@@ -958,23 +1353,31 @@ function batches(){
 }
 function setBatches(list){ S.settings.batches = JSON.stringify(list); S.settingsDirty = true; }
 
-/* ---------- Hy-Line Brown reference curves ---------- */
+/* ---------- Hy-Line Brown reference curves ----------
+   Source: Hy-Line Brown Performance Standards Guide, Commercial Layers,
+   Conventional Systems — December 2025 (hyline.com).
+   Lay % uses the LOWER bound of Hy-Line's band: a small farm judged against
+   the bottom of the standard is still meeting it, and projections built on
+   it stay prudent. Past week 80 the guide's weekly table is not used here,
+   so the curve is held on a gentle decline (an extrapolation, flagged).  */
 function layRate(w){
-  const p=[[17,0],[18,5],[19,20],[20,42],[21,62],[22,78],[23,87],[24,91],[25,93],[26,95],
-           [28,95],[30,94],[35,91],[40,88],[45,85],[50,81],[55,77],[60,72],[65,67],[70,62],[75,56],[80,49]];
+  const p=[[17,0],[18,6.7],[20,52.5],[22,87.0],[24,92.4],[26,93.6],[28,93.5],[30,93.3],
+           [35,92.7],[40,91.9],[50,90.0],[60,87.4],[70,83.6],[80,79.7]];
   if(w <= 17) return 0;
-  if(w >= 80) return 45;
+  if(w >= 80) return Math.max(50, 79.7 - 0.4*(w-80));
   for(let i=0;i<p.length-1;i++){
     const [x1,y1]=p[i], [x2,y2]=p[i+1];
     if(w>=x1 && w<=x2) return y1 + (y2-y1)*(w-x1)/(x2-x1);
   }
   return 0;
 }
+/* Body weight band, kg — same guide, same edition. */
 function weightBand(w){
-  const p=[[18,1.45,1.55],[20,1.55,1.68],[22,1.65,1.78],[24,1.78,1.90],[26,1.82,1.95],
-           [30,1.88,2.00],[40,1.95,2.08],[50,2.00,2.12],[60,2.03,2.15],[70,2.05,2.18]];
+  const p=[[18,1.411,1.492],[20,1.524,1.611],[22,1.638,1.732],[24,1.739,1.838],
+           [26,1.810,1.913],[28,1.847,1.953],[30,1.864,1.971],[35,1.896,2.004],
+           [40,1.921,2.030],[50,1.938,2.049],[60,1.947,2.058],[70,1.954,2.066],[80,1.960,2.072]];
   if(w<=18) return [p[0][1],p[0][2]];
-  if(w>=70) return [p[p.length-1][1],p[p.length-1][2]];
+  if(w>=80) return [p[p.length-1][1],p[p.length-1][2]];
   for(let i=0;i<p.length-1;i++){
     const a=p[i], b=p[i+1];
     if(w>=a[0] && w<=b[0]){
@@ -1254,9 +1657,25 @@ function normalise(j){
                   category:x.category||'other', description:x.description||'', supplier:x.supplier||'',
                   invoice:String(x.invoice_no||''), amount:num(x.amount), vat:num(x.vat),
                   paid:x.paid||'', by:x.by||'', ts:num(x.ts) }));
-  S.recon     = (j.recon||[]).map(r => ({ id:String(r.id), period:String(r.period), status:r.status||'query',
+  S.recon     = (j.recon||[]).map(r => ({ id:String(r.id), period:String(r.period).slice(0,7), status:r.status||'query',
                   eggs_note:r.eggs_note||'', cash_note:r.cash_note||'', note:r.note||'',
                   by:r.by||'', ts:num(r.ts) }));
+  S.checks    = (j.checks||[]).map(c => ({ id:String(c.id), list:String(c.list||''), period: String(c.list)==='monthly' ? String(c.period||'').slice(0,7) : String(c.period||''),
+                  item:String(c.item||''), done: String(c.done) === 'yes' || c.done === true,
+                  note:c.note||'', by:c.by||'', ts:num(c.ts) }));
+  S.visitors  = (j.visitors||[]).map(v => ({ id:String(v.id), date:String(v.date), name:v.name||'',
+                  reason:v.reason||'', own_poultry: String(v.own_poultry) === 'yes' || v.own_poultry === true,
+                  footbath: String(v.footbath) === 'yes' || v.footbath === true,
+                  note:v.note||'', by:v.by||'', ts:num(v.ts) }));
+  S.purchases = (j.purchases||[]).map(x => ({ rid:String(x.rid), id:String(x.id), item:String(x.item||''),
+                  category:x.category||'hardware', priority:String(x.priority||'2'), qty:String(x.qty==null?'':x.qty),
+                  est_low:num(x.est_low), est_high:num(x.est_high), status:x.status||'need', supplier:String(x.supplier||''),
+                  actual:num(x.actual), date:x.date?String(x.date).slice(0,10):'', note:String(x.note||''),
+                  by:x.by||'', ts:num(x.ts) }));
+  S.suppliers = (j.suppliers||[]).map(x => ({ rid:String(x.rid), id:String(x.id), name:String(x.name||''),
+                  category:String(x.category||''), location:String(x.location||''), contact:String(x.contact||''),
+                  best_for:String(x.best_for||''), status:x.status||'option', why:String(x.why||''),
+                  by:x.by||'', ts:num(x.ts) }));
   if(j.settings) S.settings = { ...S.settings, ...j.settings };
 }
 
@@ -1270,13 +1689,23 @@ async function syncNow(quiet){
   }
   syncing = true; setBar('pend','Syncing…');
   try{
-    const body = { ...S.q };
+    const body = {};
+    Object.keys(S.q).forEach(k => body[k] = S.q[k].slice());      // a snapshot of what is being sent
     if(isAdmin() && S.settingsDirty) body.settings = S.settings;
     const j = await api('sync', body);
     if(j.waiting){ S.auth.me = j.me; save(); showGate('pending'); syncing=false; return; }
     S.auth.me = j.me; S.auth.farm = j.farm;
     normalise(j);
-    S.q = { records:[], sales:[], weights:[], health:[], feed:[], water:[], expenses:[], recon:[] };
+    /* anything tapped while this sync was in flight stays queued and stays on screen */
+    Object.keys(S.q).forEach(k => {
+      const sent = body[k] || [];
+      S.q[k] = S.q[k].filter(x => sent.indexOf(x) < 0);
+      S.q[k].forEach(x => {
+        if(k === 'records'){ S.records = S.records.filter(r => r.date !== x.date); S.records.push(x); }
+        else if(!S[k].some(y => (y.rid || y.id) === (x.rid || x.id))) S[k].push(x);
+      });
+    });
+    if(queued()) setTimeout(() => syncNow(true), 1500);
     S.settingsDirty = false; S.lastSync = Date.now(); S.pending = num(j.pending);
     save(); renderAll();
     setBar('ok','Synced ' + new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) +
@@ -1844,6 +2273,648 @@ function saveRecon(){
   toast(monthName(ym) + ' signed off');
 }
 
+/* =====================================================================
+   CHECKLISTS — the printed Operations Calendar, in the app
+   Every tick is saved with the name of the person and the time, and
+   synced, so the whole team is looking at the same list.
+   ===================================================================== */
+function isoWeek(ds){
+  const d = d2(ds), day = (d.getDay()+6)%7;
+  d.setDate(d.getDate() - day + 3);                       // the Thursday of this week
+  const jan4 = new Date(d.getFullYear(), 0, 4);
+  const wk = 1 + Math.round(((d - jan4)/864e5 - 3 + ((jan4.getDay()+6)%7)) / 7);
+  return d.getFullYear() + '-W' + String(wk).padStart(2,'0');
+}
+function weekday(){ return ((new Date().getDay()+6)%7) + 1; }   // 1 Monday … 7 Sunday
+
+function dailyItems(c){
+  const half = (c.dailyKg/2).toFixed(1);
+  return [
+    ['lights','05:30','Lights on','16 hours of light a day in total. Never shorten the day once birds are laying.','lighting'],
+    ['walk-am','06:30','Morning walk-through','Look into every cage. Alert birds? Any dead bird — remove it now and record it.','healthy-sick'],
+    ['water-am','06:45','Water','Every drinker and nipple flowing. Rinse, refill, top up the backup containers.','water'],
+    ['feed-am','07:00','Morning feed','Half the day\'s ration — about ' + half + ' kg for ' + c.birds + ' birds. Level it along the trough.','feed'],
+    ['eggs-1','09:30','Egg collection 1','Point-end down in the trays. Cracked and dirty eggs go aside — they may not be sold.','egg-handling'],
+    ['eggs-2','12:30','Egg collection 2 + water check','In hot weather refill drinkers — hens can drink double in the heat.','heat-stress'],
+    ['feed-pm','14:00','Afternoon feed','The second half — about ' + half + ' kg. Sweep up spilled feed; it feeds rats.','feed'],
+    ['eggs-3','16:30','Egg collection 3','Final collection. Grade, count, and record the day\'s total.','egg-handling'],
+    ['walk-pm','17:00','Evening walk-through','Did every bird eat? Hunched, pale or isolated birds go to the sick cage now — not tomorrow.','healthy-sick'],
+    ['lockup','17:30','Lock-up','Doors and curtains secure. Footbath topped up for the morning.','biosecurity'],
+    ['record','—','Record today in the app','Eggs, broken, feed, water, any deaths. If it is not written down, it did not happen.','records']
+  ];
+}
+const WEEKLY = [
+  [1,'Manure out (1 of 3)','Scrape the trays or pit under the cages. Smell for ammonia at bird height — if it stings your eyes, it is hurting theirs.','housing'],
+  [2,'Scrub the feeders','Disinfectant, rinse well, dry completely before refilling.','biosecurity'],
+  [3,'Manure out (2 of 3) + rodent check','Look for droppings, burrows and gnaw marks. Refresh bait stations OUTSIDE the house, never inside the cages.','biosecurity'],
+  [4,'Scrub drinkers and nipple lines','Disinfect and flush them through. Wash the egg trays and the packing table.','water'],
+  [5,'Manure out (3 of 3) + structure check','Mesh, cage doors, hinges, curtains — fix gaps the same day. Fresh disinfectant in the footbath.','biosecurity'],
+  [6,'Feed stock count','Bags on hand against days left. Order when 5 days remain — the Home screen shows the number.','feed'],
+  [7,'Sales admin, bank the cash, plan the week','Eggs laid against eggs sold. Count the cash against the sales register and bank it — never more than R1,500 on hand overnight. Confirm standing orders; chase unpaid accounts older than 7 days.','finance-policy']
+];
+const MONTHLY = [
+  ['vitamins','Vitamins and electrolytes','A 3–5 day course in the drinking water — and again after any stress: transport, vaccination, a heatwave.','water'],
+  ['deepclean','Deep-clean one section','Walls, cage frames, floor. One section a month covers the whole house every 2–3 months without upsetting every bird at once.','biosecurity'],
+  ['weigh','Weigh 10 birds per batch','Enter them under Record → Weights. The app judges each bird against the Hy-Line standard.','body-weight','rec:weights'],
+  ['cull','Cull check (from 30 weeks)','Look for persistent non-layers: pale, shrunken comb; dry vent; narrow pelvic bones. Sell them live.','culling'],
+  ['feedaudit','Feed audit','Bags used against eggs produced. Feed rising while eggs stay flat means waste, rats or disease.','feed'],
+  ['parasites','Parasite check','Under the wings and around the vent. Red mite hides in cage joints by day — check at night with a torch.','parasites'],
+  ['finance','Finance report and partners\' meeting','Monthly report by the 5th, partners\' meeting by the 10th: profit, fund balances (feed reserve first), upcoming spend. Is payroll in the ledger? Decisions recorded in writing.','finance-policy','money:pl'],
+  ['recon','Reconcile last month','The accountant signs last month off under Books → Reconcile.','records','money:recon']
+];
+const HEALTH = [
+  ['nd','Newcastle disease booster','Compulsory in South Africa. Live vaccine in cool, clean, UNCHLORINATED water early in the morning. Your vet sets the interval — published guidance runs from every 4–6 weeks to every 60–90 days.','nd_interval','vaccination',/newcastle|la ?sota|clone ?30|\bn\.?d\.?\b/i],
+  ['deworm','Deworming','Only after a faecal test or on your vet\'s advice. Note the egg-withdrawal period on the label — no eggs sold until it has passed.','deworm_interval','parasites',/worm|piperazine|levamisole|fenbendazole|flubendazole/i],
+  ['mites','External parasite check','Under wings and around the vent; red mite in cage joints at night.','mite_interval','parasites',/mite|lice|louse/i],
+  ['weigh','Weigh sample birds','10 birds per batch, same birds each time if you can.','weigh_interval','body-weight',null]
+];
+const ARRIVAL = [
+  ['cage','Cage ready and tested','Feeders, drinkers (every nipple flowing), curtains and footbath — before the truck arrives.','housing'],
+  ['feedstock','Feed on site for 25 days','At the NEW burn rate, not today\'s. The Home screen works out the number of bags.','feed'],
+  ['count','Count the birds in yourself','Write the number down and check it against the invoice before signing.','records'],
+  ['vaxrec','Collect the written vaccination record','Every batch. Newcastle vaccination is compulsory in South Africa — keep the proof.','vaccination'],
+  ['electro','Electrolytes days 1–3','In the drinking water. Eases transport stress and brings lay on sooner.','water'],
+  ['quiet','Quiet settling week','No handling, no visitors, no changes to feed or light.','biosecurity'],
+  ['date','Set the real arrival date','In Setup. The lay curve, feed and break-even all run from that one date.','records','setup'],
+  ['weigh2','First weigh at two weeks','Sets the batch against the Hy-Line standard from the start.','body-weight','rec:weights']
+];
+const CLEANOUT = [
+  ['sell','Sell the spent hens','Sell live. Hen meat may only be sold if slaughtered at an abattoir (Meat Safety Act).','culling'],
+  ['strip','Strip the house','All manure and all feed out.','biosecurity'],
+  ['wash','Dry-clean, then wash everything','Cages, feeders, drinkers, walls, floor.','biosecurity'],
+  ['disinfect','Disinfect','At the label rate, and leave it for its full contact time.','biosecurity'],
+  ['pests','Treat for red mite and rodents','The empty house is the easiest time to break the cycle.','parasites'],
+  ['rest','Rest it empty for 1–2 weeks','Most disease organisms die off without a host.','biosecurity'],
+  ['repair','Repair and re-test','Everything working before the next batch arrives.','housing']
+];
+
+let TICK = {};
+function indexTicks(){
+  TICK = {};
+  S.checks.forEach(c => {
+    const k = c.list + '|' + c.period + '|' + c.item;
+    if(!TICK[k] || c.ts >= TICK[k].ts) TICK[k] = c;
+  });
+}
+function tickOf(list, period, item){ return TICK[list + '|' + period + '|' + item]; }
+function toggleTick(list, period, item){
+  if(!can('write')) return toast('Only the people doing the work can tick these off');
+  const cur = tickOf(list, period, item);
+  queue('checks', { id:uid('k'), list, period, item, done: !(cur && cur.done), note:'',
+                    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+}
+function doneToday(item){
+  if(!can('write')) return toast('Only the people doing the work can record this');
+  queue('checks', { id:uid('k'), list:'health', period:today(), item, done:true, note:'',
+                    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  toast('Recorded as done today');
+}
+function tickTime(c){
+  try{ return new Date(c.ts).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; }
+}
+function jumpTo(target){
+  const [v, sub] = String(target).split(':');
+  go(v);
+  if(sub){
+    const b = document.querySelector('#recTabs button[data-r="'+sub+'"], #bookTabs button[data-b="'+sub+'"], #buyTabs button[data-u="'+sub+'"]');
+    if(b) b.click();
+  }
+}
+function chkRow(list, period, it, opts){
+  opts = opts || {};
+  const [id, when, title, detail, kb, link] = it;
+  const t = opts.auto ? { done:true, by:'recorded in the app', ts:0 } : tickOf(list, period, id);
+  const done = !!(t && t.done);
+  const ro = !can('write') || opts.auto;
+  return '<div class="chk' + (done?' done':'') + (opts.today?' today':'') + (ro?' locked-row':'') + '"' +
+    (ro ? '' : ' onclick="toggleTick(\'' + list + '\',\'' + period + '\',\'' + id + '\')"') + '>' +
+    '<span class="box">' + (done ? '✓' : '') + '</span>' +
+    '<span class="body"><div class="t">' + esc(title) + '</div>' +
+    (detail ? '<div class="d">' + esc(detail) + '</div>' : '') +
+    (done && t && t.by ? '<div class="who">✓ ' + esc(t.by) + (t.ts ? ' · ' + tickTime(t) : '') + '</div>' : '') +
+    ((kb || link) ? '<div class="d" style="margin-top:5px">' +
+      (kb ? '<a href="#" onclick="event.stopPropagation();openKB(\'' + kb + '\');return false">Why?</a>' : '') +
+      (kb && link ? ' · ' : '') +
+      (link ? '<a href="#" onclick="event.stopPropagation();jumpTo(\'' + link + '\');return false">Open it</a>' : '') +
+      '</div>' : '') +
+    '</span>' + (when ? '<span class="when">' + esc(when) + '</span>' : '') + '</div>';
+}
+function listCard(title, sub, rows, done, total, extra){
+  const pct = total ? Math.round(done/total*100) : 0;
+  return '<div class="card"><h2>' + title + ' <span class="pill ' + (done===total&&total?'g':'y') + '">' +
+    done + ' of ' + total + '</span></h2>' + (sub ? '<p class="muted" style="margin:-4px 0 8px">' + sub + '</p>' : '') +
+    '<div class="prog"><i style="width:' + pct + '%"></i></div>' + (extra||'') + rows + '</div>';
+}
+function lastHealth(h){
+  const [id, , , , , re] = h;
+  let last = '';
+  S.checks.forEach(c => { if(c.list==='health' && c.item===id && c.done && c.period > last) last = c.period; });
+  if(re) S.health.forEach(r => { if(re.test(String(r.treatment||'') + ' ' + String(r.note||'')) && r.date > last) last = r.date; });
+  if(id === 'weigh') S.weights.forEach(w => { if(w.date > last) last = w.date; });
+  return last;
+}
+
+function renderTasks(){
+  if(!$('t-daily')) return;
+  indexTicks();
+  const c = calc(), t = today(), wk = isoWeek(t), ym = t.slice(0,7), wd = weekday();
+  const ro = !can('write')
+    ? '<div class="alert blue"><span class="ic">👁️</span><div>You can see every checklist and who ticked what. Ticking is for the people doing the work.</div></div>' : '';
+
+  /* today */
+  const D = dailyItems(c);
+  const recToday = S.records.some(r => r.date === t);
+  let dn = 0;
+  const drows = D.map(it => {
+    const auto = it[0]==='record' && recToday;
+    const tk = auto ? {done:true} : tickOf('daily', t, it[0]);
+    if(tk && tk.done) dn++;
+    return chkRow('daily', t, it, { auto });
+  }).join('');
+  $('t-daily').innerHTML = ro + listCard('Daily routine — ' + fmtD(t),
+    'Every day, weekends and holidays included. About 2½–3 hours at 200 birds.', drows, dn, D.length) +
+    '<div class="card"><h2>In hot weather</h2><p class="muted" style="margin:0">Above about 28 °C: collect eggs more often, ' +
+    'check water every hour, scrape manure daily instead of three times a week, and do nothing stressful in the heat of the ' +
+    'day. <a href="#" onclick="openKB(\'heat-stress\');return false">Heat stress guide</a></p></div>';
+
+  /* this week */
+  let wn = 0;
+  const wrows = WEEKLY.map(([day, title, detail, kb]) => {
+    const name = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][day];
+    const tk = tickOf('weekly', wk, 'd' + day); if(tk && tk.done) wn++;
+    return chkRow('weekly', wk, ['d'+day, name.slice(0,3), name + ' — ' + title, detail, kb], { today: day===wd });
+  }).join('');
+  $('t-weekly').innerHTML = ro + listCard('This week · ' + wk, 'One extra job each day, on top of the daily routine.',
+    wrows, wn, WEEKLY.length);
+
+  /* this month */
+  let mn = 0;
+  const mrows = MONTHLY.map(it => { const tk = tickOf('monthly', ym, it[0]); if(tk && tk.done) mn++;
+    return chkRow('monthly', ym, [it[0], '', it[1], it[2], it[3], it[4]]); }).join('');
+  $('t-monthly').innerHTML = ro + listCard('This month · ' + monthName(ym), 'Do these in the first week of the month.',
+    mrows, mn, MONTHLY.length);
+
+  /* health — due dates */
+  let late = 0;
+  const hrows = HEALTH.map(h => {
+    const [id, title, detail, key, kb] = h;
+    const every = stN(key) || 30, last = lastHealth(h);
+    let cls = 'none', label = 'no record yet';
+    if(last){
+      const left = every - days(last, t);
+      if(left < 0){ cls='late'; label = Math.abs(left) + ' days overdue'; late++; }
+      else if(left <= 7){ cls='soon'; label = 'due in ' + left + ' day' + (left===1?'':'s'); }
+      else { cls='ok'; label = 'due ' + fmtD(addD(last, every)); }
+    }
+    return '<div class="chk locked-row"><span class="box" style="background:var(--' +
+      (cls==='late'?'red':cls==='soon'?'gold':cls==='ok'?'accent':'blue') + ');border:none">' +
+      (cls==='ok'?'✓':cls==='late'?'!':'•') + '</span><span class="body"><div class="t">' + esc(title) + '</div>' +
+      '<div class="d">' + esc(detail) + '</div><div class="d" style="margin-top:5px">Every ' + every + ' days · ' +
+      (last ? 'last done ' + fmtD(last) : 'never recorded') + ' · <a href="#" onclick="openKB(\'' + kb + '\');return false">Why?</a></div>' +
+      (can('write') ? '<button class="btn sm ghost" style="width:auto;margin-top:8px;padding:7px 12px" onclick="doneToday(\'' + id + '\')">Done today</button>' : '') +
+      '</span><span class="due ' + cls + '">' + label + '</span></div>';
+  }).join('');
+  $('t-health').innerHTML = ro + '<div class="card"><h2>Health programme <span class="pill ' + (late?'r':'g') + '">' +
+    (late ? late + ' overdue' : 'up to date') + '</span></h2><p class="muted" style="margin:-4px 0 8px">Due dates come ' +
+    'from the last time each job was ticked here or recorded under Record → Health. Change the intervals in Setup.</p>' +
+    hrows + '</div><div class="card"><h2>Rules that never change</h2><ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6">' +
+    '<li>Never vaccinate visibly sick birds.</li><li>Never put vaccine in chlorinated or disinfected water — it kills it.</li>' +
+    '<li>Every medicine goes in Record → Health with its withdrawal days. No eggs are sold until it passes.</li>' +
+    '<li>More than 2–3 birds sick or dying in a week: call the vet. Sudden deaths with swollen heads or twisted necks: ' +
+    '<b>stop all movement and call the state vet</b> — <a href="#" onclick="openKB(\'notifiable\');return false">what to do</a>.</li></ul></div>';
+  document.querySelectorAll('.sb-tasks').forEach(el => { el.style.display = late ? 'grid' : 'none'; el.textContent = late; });
+
+  /* batches */
+  $('t-batch').innerHTML = ro + c.perBatch.map(b => {
+    let an = 0, cn = 0;
+    const ar = ARRIVAL.map(it => { const tk = tickOf('arrival', b.id, it[0]); if(tk && tk.done) an++;
+      return chkRow('arrival', b.id, [it[0], '', it[1], it[2], it[3], it[4]]); }).join('');
+    const cr = CLEANOUT.map(it => { const tk = tickOf('cleanout', b.id, it[0]); if(tk && tk.done) cn++;
+      return chkRow('cleanout', b.id, [it[0], '', it[1], it[2], it[3]]); }).join('');
+    const state = b.onFarm ? 'on the farm · week ' + b.age.toFixed(1) : 'arriving ' + fmtD(b.arrived) + ' · in ' + b.inDays + ' days';
+    return listCard('🐔 ' + esc(b.name) + ' — arrival', num(b.count) + ' birds · ' + state, ar, an, ARRIVAL.length) +
+      listCard(esc(b.name) + ' — end of lay clean-out', 'When this batch leaves, before the next one comes in.', cr, cn, CLEANOUT.length);
+  }).join('') || '<div class="card"><p class="muted">No batches set up yet — add one in Setup.</p></div>';
+}
+document.querySelectorAll('#taskTabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#taskTabs button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelectorAll('.tsec').forEach(x => x.classList.remove('on'));
+  $('t-' + b.dataset.t).classList.add('on');
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+/* =====================================================================
+   FORM 9 — VISITOR REGISTER
+   ===================================================================== */
+function visitorPreview(){
+  const own = $('vOwn').value === 'yes', foot = $('vFoot').value === 'yes', w = [];
+  if(own) w.push(['red','🚫','<b>Keeps poultry at home — should not enter the house.</b> Disease travels on boots, clothes and hands. Serve them at the gate.']);
+  if(!foot) w.push(['gold','🥾','<b>No footbath, no entry.</b> Fresh disinfectant in the bath, boots in for the full contact time.']);
+  $('vWarn').innerHTML = w.map(x => '<div class="alert ' + x[0] + '"><span class="ic">' + x[1] + '</span><div>' + x[2] + '</div></div>').join('');
+}
+function saveVisitor(){
+  if(!can('write')) return toast('Only the farm team can sign visitors in');
+  const name = $('vName').value.trim();
+  if(name.length < 2) return toast('Their full name please');
+  queue('visitors', { id:uid('v'), date:$('vDate').value||today(), name, reason:$('vReason').value.trim(),
+    own_poultry: $('vOwn').value==='yes', footbath: $('vFoot').value==='yes', note:'',
+    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  $('vName').value=''; $('vReason').value=''; $('vOwn').value='no'; $('vFoot').value='yes'; $('vWarn').innerHTML='';
+  toast(name + ' signed in');
+}
+function renderVisitors(){
+  if(!$('listVisitors')) return;
+  if($('vDate') && !$('vDate').value) $('vDate').value = today();
+  const v = [...S.visitors].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,30);
+  $('listVisitors').innerHTML = v.length ? v.map(x =>
+    '<div class="rec"><span class="d">' + fmtD(x.date) + '</span><span class="m"><b>' + esc(x.name) + '</b>' +
+    (x.reason ? ' · ' + esc(x.reason) : '') +
+    (x.own_poultry ? ' <span class="pill r">keeps poultry</span>' : '') +
+    (!x.footbath ? ' <span class="pill y">no footbath</span>' : '') + '</span></div>').join('')
+    : '<p class="muted">Nobody signed in yet.</p>';
+}
+['vOwn','vFoot'].forEach(id => { const el = $(id); if(el) el.addEventListener('change', visitorPreview); });
+
+/* =====================================================================
+   TOOLTIPS — tap the little "i" beside a word to have it explained
+   ===================================================================== */
+const TIPS = {
+  lay:['<b>Lay rate</b> is eggs laid ÷ birds on the farm × 100. 47 eggs from 50 hens is 94%. The app compares it with the Hy-Line standard for your birds\' age.','lay-cycle'],
+  unsold:['<b>Unsold stock</b> is every egg collected minus every egg sold and broken. Eggs keep about a week at room temperature — unsold eggs are cash with a deadline.','egg-handling'],
+  feedtank:['<b>Feed tank</b> counts every bag delivered, minus what the birds eat each day. Days left = kg on hand ÷ kg eaten a day. A batch that has not arrived yet is not counted until its arrival date.','feed'],
+  target:['<b>This week against target</b> — sales since Monday against the money the farm must bring in every week to cover feed, wages and running costs.','money'],
+  broken:['<b>Broken</b> — cracked or dirty eggs set aside. They may not be sold under South African egg regulations, so they are subtracted from stock.','egg-grades'],
+  feedkg:['<b>Feed kg</b> — what was actually put in the troughs today. Leave it blank and the app uses the burn rate from Setup.','feed'],
+  trays:['<b>Trays</b> of 30. The app prices them at the tray price in Setup. Record the sale on the day the eggs LEAVE, never the day the money arrives.','selling'],
+  singles:['<b>Loose eggs</b> sold individually or in small packs, priced at the loose-egg price in Setup.','selling'],
+  customer:['<b>Customer</b> — a real name. "Walk in" is refused on purpose: a name and a number is how a standing order starts.','selling'],
+  tag:['<b>Tag number</b> — three digits, zero-padded (006, not 6), so they sort correctly.','body-weight'],
+  weight:['<b>Weight in kilograms</b> with a decimal point: 1.85, not 185. Anything above 10 is refused as a typing mistake.','body-weight'],
+  withdraw:['<b>Withdrawal days</b> — from the medicine label. No eggs may be sold until this many days after the last dose. The app blocks sales until the date passes.','withdrawal'],
+  capital:['<b>Capital</b> is money spent building the farm — cages, the structure, the birds themselves. <b>Running costs</b> are what it costs to keep laying — feed, wages, water.','money'],
+  recon:['<b>Reconcile</b> — check that eggs collected, eggs sold and cash banked all agree for the month, then sign it off. A sign-off never changes a figure.','records'],
+  breakeven:['<b>Break-even</b> — the tray price at which sales exactly cover every running cost. Below it the farm loses money on every tray.','money'],
+  biosec:['<b>Biosecurity</b> — keeping disease out. It travels on boots, clothes, crates, trays, vehicles, wild birds and rats.','biosecurity'],
+  ownpoultry:['People who keep their own chickens can carry disease from their birds to yours on their boots and clothes. They should not enter the house.','biosecurity'],
+  footbath:['A footbath only works with fresh disinfectant at the label strength and boots standing in it for the full contact time.','biosecurity'],
+  invite:['An <b>invite code</b> comes from the CEO or a manager and carries a role. Sign up with it and you skip the waiting screen.',''],
+  roles:['<b>Roles</b> decide what each person can change. Everyone can see the figures; only some people can record, change prices or approve others.',''],
+  lead:['How many days of feed left before the app tells you to order. 5 is sensible at 190 birds — deliveries can take a few days.','feed'],
+  grams:['<b>Grams per bird per day</b>. Hy-Line\'s standard in lay is 110–118 g, more in cold weather (about 132 g at 10 °C) and less in heat.','feed'],
+  buylist:['<b>The buying list</b> — every item the farm needs, with its price range, where it is sold, and whether we have it. Changing an item never deletes the old line: the history shows who changed what and when.','buying-rules'],
+  counter:['<b>Where it is sold.</b> No single shop sells everything. Poultry equipment shops, a registered vet counter, hardware stores and online shops each cover part of the list. Anything that goes into a bird or its water comes from the vet counter only.','buying-rules'],
+  suppliers:['<b>Supplier book</b> — who we buy from, who quoted us and who else is out there, with the reason. Before a big purchase, get two comparison quotes.','buying-rules'],
+  approve:['<b>Who must approve</b>, from the Finance Policy: up to R500 any one partner with a receipt · R501–R2,500 Finance and Operations together · R2,501–R10,000 all partners in writing · above R10,000 or any loan all partners and the investor, signed. Feed never waits for approval.','finance-policy'],
+  ndint:['<b>Newcastle booster interval</b>. Vaccination is compulsory in South Africa. Published guidance ranges from every 4–6 weeks to every 60–90 days — set what your vet recommends.','vaccination']
+};
+function decorateTips(){
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    if(el.querySelector(':scope > .ti')) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ti'; b.textContent = 'i';
+    b.setAttribute('aria-label','What does this mean?');
+    b.onclick = e => { e.preventDefault(); e.stopPropagation(); showTip(el.dataset.tip); };
+    el.appendChild(b);
+  });
+}
+function showTip(key){
+  const t = TIPS[key]; if(!t) return;
+  $('tipBody').innerHTML = t[0];
+  const more = $('tipMore');
+  if(t[1] && window.KB){ more.style.display=''; more.onclick = () => { hideTip(); openKB(t[1]); }; }
+  else more.style.display = 'none';
+  $('tipPop').classList.add('on');
+}
+function hideTip(){ $('tipPop').classList.remove('on'); }
+
+/* =====================================================================
+   KNOWLEDGE BASE & HELP — content lives in kb.js so it loads once,
+   is cached for offline use, and can grow without touching this file
+   ===================================================================== */
+let KB_CAT = 'all', KB_OPEN = '';
+function kbReady(){ return Array.isArray(window.KB) && window.KB.length; }
+function kbSearchText(a){ return (a.title + ' ' + a.summary + ' ' + (a.tags||'') + ' ' + a.cat + ' ' + a.body).toLowerCase(); }
+function renderKB(){
+  if(!$('kbList')) return;
+  if(!kbReady()){
+    $('kbList').innerHTML = '<div class="card"><p class="muted">The knowledge library has not loaded yet. Connect to the internet once and it will be kept on this phone for offline use.</p></div>';
+    return;
+  }
+  const cats = window.KB_CATS || [];
+  $('kbCount').textContent = window.KB.length + ' articles';
+  $('kbCats').innerHTML = '<button class="' + (KB_CAT==='all'?'on':'') + '" data-c="all">All</button>' +
+    cats.map(c => '<button class="' + (KB_CAT===c[0]?'on':'') + '" data-c="' + c[0] + '">' + c[1] + '</button>').join('');
+  $('kbCats').querySelectorAll('button').forEach(b => b.onclick = () => { KB_CAT = b.dataset.c; renderKB(); });
+
+  const q = ($('kbQ').value || '').trim().toLowerCase();
+  const words = q.split(/\s+/).filter(Boolean);
+  const list = window.KB.filter(a => (KB_CAT==='all' || a.cat===KB_CAT) &&
+    (!words.length || words.every(w => kbSearchText(a).indexOf(w) >= 0)));
+  const catName = id => ((cats.find(c => c[0]===id) || [,''])[1]);
+  $('kbList').innerHTML = list.length ? list.map(a =>
+    '<button class="kb-item' + (a.id===KB_OPEN?' on':'') + '" onclick="openKB(\'' + a.id + '\')">' +
+    '<span class="cat">' + esc(catName(a.cat)) + '</span><b>' + esc(a.title) + '</b><span>' + esc(a.summary) + '</span></button>').join('')
+    : '<div class="card"><p class="muted">Nothing matches "' + esc(q) + '". Try a single word — mites, heat, grade, vaccine.</p></div>';
+
+  if(!KB_OPEN && window.innerWidth >= 1024 && list.length) showArticle(list[0].id, true);
+  else if(KB_OPEN) showArticle(KB_OPEN, true);
+}
+function openKB(id){
+  if(!$('v-kb').classList.contains('on')) go('kb');
+  KB_OPEN = id; showArticle(id); renderKB();
+  const art = $('kbArticle');
+  if(art && window.innerWidth < 1024) window.scrollTo({ top:0, behavior:'smooth' });
+}
+function showArticle(id, quiet){
+  if(!kbReady()) return;
+  const a = window.KB.find(x => x.id === id); if(!a) return;
+  KB_OPEN = id;
+  const rel = (a.related||[]).map(r => window.KB.find(x => x.id===r)).filter(Boolean);
+  $('kbArticle').innerHTML = '<button class="kb-back" onclick="closeKB()">← All articles</button>' +
+    '<h1>' + esc(a.title) + '</h1><p class="muted" style="margin:0 0 12px">' + esc(a.summary) + '</p>' + a.body +
+    (rel.length ? '<h3>Read next</h3><p>' + rel.map(r => '<a href="#" onclick="openKB(\'' + r.id + '\');return false">' + esc(r.title) + '</a>').join(' · ') + '</p>' : '') +
+    (a.src && a.src.length ? '<div class="src"><b>Sources</b><br>' + a.src.map(x =>
+      x[1] ? '<a href="' + x[1] + '" target="_blank" rel="noopener">' + esc(x[0]) + '</a>' : esc(x[0])).join('<br>') + '</div>' : '') +
+    '<div class="src">Planning aid, not veterinary advice. Your vet and the product label always come first.</div>';
+  $('kbArticle').classList.add('on');
+  document.querySelector('.kb-wrap').classList.add('reading');
+}
+function closeKB(){
+  KB_OPEN = '';
+  $('kbArticle').classList.remove('on');
+  document.querySelector('.kb-wrap').classList.remove('reading');
+  renderKB();
+}
+if($('kbQ')) $('kbQ').addEventListener('input', () => { if(window.innerWidth < 1024){ KB_OPEN=''; closeKB(); } else renderKB(); });
+
+function renderHelp(){
+  if(!$('helpBox')) return;
+  $('helpVer').textContent = 'You are signed in as ' + ((S.auth.me && S.auth.me.name) || '—') + ' · ' +
+    (ROLE[myRole()] || '') + ' · app ' + APP_VERSION;
+  if(!Array.isArray(window.HELP)){
+    $('helpBox').innerHTML = '<div class="card"><p class="muted">Help has not loaded yet — connect once and it stays on this phone.</p></div>';
+    return;
+  }
+  const q = ($('helpQ').value || '').trim().toLowerCase();
+  const words = q.split(/\s+/).filter(Boolean);
+  const mine = myRole();
+  const list = window.HELP.filter(h => (!h.roles || h.roles.indexOf(mine) >= 0) &&
+    (!words.length || words.every(w => (h.title + ' ' + h.body + ' ' + (h.tags||'')).toLowerCase().indexOf(w) >= 0)));
+  $('helpBox').innerHTML = list.map(h =>
+    '<div class="card help-card"><h3>' + h.icon + ' ' + esc(h.title) + '</h3>' + h.body +
+    (h.go ? '<button class="btn sm ghost go" onclick="jumpTo(\'' + h.go + '\')">Take me there</button>' : '') + '</div>').join('')
+    || '<div class="card"><p class="muted">Nothing matches. Try one word — PIN, install, sale, offline.</p></div>';
+}
+if($('helpQ')) $('helpQ').addEventListener('input', renderHelp);
+
+/* =====================================================================
+   BUYING LIST & SUPPLIERS — the day-one paper list, quotes and every
+   supplier, with the reason. Each change is a new row, so the history
+   of who changed what, when, and why is never lost.
+   ===================================================================== */
+const BUY_CAT = { poultry:'Poultry equipment shop', vet:'Vet shop / co-op', hardware:'Hardware & general',
+                  online:'Online — instruments', capital:'Capital — birds & buildings', feed:'Feed' };
+const BUY_PRI = [['1','Priority 1 — before the birds arrive'],['2','Priority 2 — from egg income'],
+                 ['3','Priority 3 — as we grow'],['cap','Capital projects'],['run','Running supplies']];
+const BUY_ST  = { need:['To buy','y'], quoted:['Quoted','b'], ordered:['Ordered','b'], bought:['Have it','g'],
+                  hold:['On hold — do not use','r'], skip:['Not needed',''] };
+const SUP_ST  = { used:['We buy here','g'], quoted:['Quoted us','b'], option:['Option','y'], avoid:['Avoid','r'] };
+let BUY_F = 'open', SUP_F = 'all', BUY_OPEN = '', SUP_OPEN = '';
+
+function csvCell(v){ return '"' + String(v==null?'':v).replace(/"/g,'""') + '"'; }
+function versions(rows){
+  const cur = {}, hist = {};
+  rows.forEach(r => { (hist[r.id] = hist[r.id] || []).push(r); if(!cur[r.id] || r.ts >= cur[r.id].ts) cur[r.id] = r; });
+  Object.keys(hist).forEach(k => hist[k].sort((a,b) => b.ts - a.ts));
+  return { cur:Object.values(cur), hist };
+}
+function buyState(){ return versions(S.purchases); }
+function supState(){ return versions(S.suppliers); }
+function approvalFor(x, amt){
+  if(x.category === 'feed') return 'Feed never waits for approval';
+  if(!(amt > 0)) return '';
+  if(amt <= 500) return 'Any partner · receipt';
+  if(amt <= 2500) return 'Finance + Operations';
+  if(amt <= 10000) return 'All partners, in writing';
+  return 'All partners + investor, signed';
+}
+function rangeTxt(lo, hi){
+  if(!(lo > 0) && !(hi > 0)) return '';
+  if(lo === hi || !(hi > 0)) return R(lo || hi);
+  return R(lo) + '–' + R(hi);
+}
+function whoWhen(x){
+  if(x.by === 'founding import' || !x.ts) return 'from the paper records';
+  try{ return esc(x.by) + ' · ' + new Date(x.ts).toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'}); }
+  catch(e){ return esc(x.by); }
+}
+function linkify(t){
+  return String(t||'').split(/\s*·\s*/).filter(Boolean).map(part => {
+    const e = esc(part);
+    const mail = part.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+    if(mail) return e.replace(esc(mail[0]), '<a href="mailto:' + mail[0] + '">' + esc(mail[0]) + '</a>');
+    const tel = part.match(/\+?\d[\d ]{7,}\d/);
+    if(tel) return e.replace(esc(tel[0]), '<a href="tel:' + tel[0].replace(/\s/g,'') + '">' + esc(tel[0]) + '</a>');
+    const web = part.match(/^[\w-]+(\.[\w-]+)+$/);
+    if(web) return '<a href="https://' + part + '" target="_blank" rel="noopener">' + e + '</a>';
+    return e;
+  }).join(' · ');
+}
+function fillBuySelects(){
+  const c = $('bCat'), p = $('bPri');
+  if(c && !c.options.length) c.innerHTML = Object.keys(BUY_CAT).map(k => '<option value="' + k + '">' + BUY_CAT[k] + '</option>').join('');
+  if(p && !p.options.length) p.innerHTML = BUY_PRI.map(x => '<option value="' + x[0] + '">' + x[1] + '</option>').join('');
+}
+
+/* a background sync must never wipe a form someone is typing into */
+function renderBuyQuiet(){ if(BUY_OPEN || SUP_OPEN) return; renderBuy(); }
+function renderBuy(){
+  if(!$('buyList')) return;
+  fillBuySelects();
+  const { cur, hist } = buyState();
+  const open = cur.filter(x => x.status==='need' || x.status==='ordered');
+  const quotes = cur.filter(x => x.status==='quoted');
+  const have = cur.filter(x => x.status==='bought' || x.status==='hold');
+  const hold = cur.filter(x => x.status==='hold');
+  const p1 = open.filter(x => x.priority==='1');
+  const now = open.filter(x => x.priority==='1' || x.priority==='2'), later = open.filter(x => !(x.priority==='1' || x.priority==='2'));
+  const sum = (arr, k) => arr.reduce((a,x) => a + num(x[k]), 0);
+  $('buyPill').textContent = open.length + ' to buy';
+  $('buySum').innerHTML =
+    '<div class="line"><span>Needed now (priority 1–2)</span><b>' + now.length + ' items · ' + (sum(now,'est_high') ? rangeTxt(sum(now,'est_low'), sum(now,'est_high')) : '—') + '</b></div>' +
+    '<div class="line"><span>Priority 1 still open</span><b>' + p1.length + '</b></div>' +
+    '<div class="line"><span>Later (priority 3 and capital projects)</span><b>' + later.length + ' items · ' + (sum(later,'est_high') ? rangeTxt(sum(later,'est_low'), sum(later,'est_high')) : '—') + '</b></div>' +
+    '<div class="line"><span>Quotes waiting for a decision</span><b>' + quotes.length + '</b></div>' +
+    '<div class="line"><span>Already on the farm</span><b>' + have.length + '</b></div>' +
+    (hold.length ? '<div class="alert red" style="margin:8px 0 0"><span class="ic">🚫</span><div><b>' + hold.length +
+      ' product(s) on hold.</b> Bought, but not to go into laying birds until the supplier confirms a registration number and withdrawal period in writing.</div></div>' : '') +
+    (cur.length ? '' : '<p class="muted">Nothing loaded yet. The CEO runs <b>importBuyingAndSuppliers</b> once in the Apps Script editor to load the day-one list.</p>');
+
+  const want = x => BUY_F==='all' ? true : BUY_F==='open' ? (x.status==='need'||x.status==='ordered')
+                  : BUY_F==='quoted' ? x.status==='quoted' : (x.status==='bought'||x.status==='hold');
+  const list = cur.filter(want);
+  const w = can('write');
+  $('buyList').innerHTML = BUY_PRI.map(([k, label]) => {
+    const rows = list.filter(x => (x.priority||'2') === k)
+      .sort((a,b) => (a.status==='hold'?-1:0) - (b.status==='hold'?-1:0) || a.item.localeCompare(b.item));
+    if(!rows.length) return '';
+    return '<div class="card"><h2>' + label + ' <span class="pill">' + rows.length + '</span></h2>' + rows.map(x => {
+      const st = BUY_ST[x.status] || [x.status,''];
+      const amt = (x.status==='bought' && x.actual > 0) ? x.actual : num(x.est_high) || num(x.est_low);
+      const money = (x.status==='bought' && x.actual > 0) ? R2(x.actual) : rangeTxt(num(x.est_low), num(x.est_high));
+      const appr = x.status==='bought' ? '' : approvalFor(x, amt);
+      const h = hist[x.id] || [];
+      const isOpen = BUY_OPEN === x.id;
+      return '<div class="item" id="bi-' + esc(x.id) + '"><div class="top" onclick="openBuy(\'' + esc(x.id) + '\')">' +
+        '<span class="nm">' + esc(x.item) + '</span><span class="amt">' + (money || '') + '</span></div>' +
+        '<div class="pills"><span class="pill ' + st[1] + '">' + st[0] + '</span>' +
+        (appr ? '<span class="pill b" onclick="showTip(\'approve\')" style="cursor:pointer">✍ ' + appr + '</span>' : '') +
+        '<span class="pill">' + esc(BUY_CAT[x.category] || x.category) + '</span></div>' +
+        '<div class="meta">' + [x.qty ? 'Qty ' + esc(x.qty) : '', x.supplier ? '🏪 ' + esc(x.supplier) : '',
+          x.date ? fmtD(x.date) : ''].filter(Boolean).join(' · ') + '</div>' +
+        (x.note ? '<div class="why">' + esc(x.note) + '</div>' : '') +
+        (isOpen ? buyHistory(h) + (w ? buyEditForm(x) : '') : '<div class="meta"><a href="#" onclick="openBuy(\'' + esc(x.id) +
+          '\');return false">' + (w ? 'Update' : 'History') + (h.length > 1 ? ' (' + h.length + ' changes)' : '') + '</a></div>') +
+        '</div>';
+    }).join('') + '</div>';
+  }).join('') || '<div class="card"><p class="muted">Nothing in this view.</p></div>';
+  renderSuppliers();
+}
+function buyHistory(h){
+  if(!h.length) return '';
+  return '<div class="hist"><b>History</b><br>' + h.slice(0,8).map(r =>
+    (BUY_ST[r.status]||[r.status])[0] + (r.actual > 0 ? ' · ' + R2(r.actual) : '') +
+    (r.supplier ? ' · ' + esc(r.supplier) : '') + ' — ' + whoWhen(r)).join('<br>') + '</div>';
+}
+function buyEditForm(x){
+  const sups = supState().cur.map(s => s.name);
+  return '<div class="ed">' +
+    '<div class="f2"><div class="field"><label>Status</label><select id="eSt">' +
+      Object.keys(BUY_ST).map(k => '<option value="' + k + '"' + (k===x.status?' selected':'') + '>' + BUY_ST[k][0] + '</option>').join('') +
+    '</select></div><div class="field"><label>Date</label><input type="date" id="eDate" value="' + esc(x.date || today()) + '"></div></div>' +
+    '<div class="f2"><div class="field"><label>Supplier</label><input type="text" id="eSup" list="supNames" value="' + esc(x.supplier) + '">' +
+      '<datalist id="supNames">' + sups.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist></div>' +
+    '<div class="field"><label>Price paid or quoted (R)</label><input type="number" id="eAmt" step="0.01" inputmode="decimal" value="' + (x.actual || '') + '"></div></div>' +
+    '<div class="field"><label>Why / notes</label><textarea id="eNote" rows="3" style="width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px">' + esc(x.note) + '</textarea></div>' +
+    (can('money') ? '<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:10px"><input type="checkbox" id="eLedger" checked style="width:auto"> ' +
+      'When marked "Have it" with a price, also add it to the ledger</label>' : '<p class="muted" style="margin:0 0 10px">The CEO or a manager records the money in Books → Ledger.</p>') +
+    '<div class="btn-row"><button class="btn sm" onclick="savePurchase(\'' + esc(x.id) + '\')">Save change</button>' +
+    '<button class="btn sm ghost" onclick="openBuy(\'\')">Close</button></div></div>';
+}
+function openBuy(id){ BUY_OPEN = (BUY_OPEN === id ? '' : id); renderBuy();
+  if(BUY_OPEN){ const el = $('bi-' + id); if(el) el.scrollIntoView({ block:'nearest' }); } }
+function savePurchase(id){
+  if(!can('write')) return toast('Only the farm team can change the buying list');
+  const x = buyState().cur.find(r => r.id === id); if(!x) return;
+  const status = $('eSt').value, actual = num($('eAmt').value), supplier = $('eSup').value.trim(),
+        date = $('eDate').value || today(), note = $('eNote').value.trim();
+  if(status === 'bought' && !supplier) return toast('Who did we buy it from?');
+  const row = { ...x, rid:uid('pr'), status, actual, supplier, date, note,
+                by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() };
+  delete row.hist;
+  queue('purchases', row);
+  const led = $('eLedger');
+  if(status === 'bought' && x.status !== 'bought' && actual > 0 && can('money') && led && led.checked){
+    queue('expenses', { id:uid('x'), date, kind: x.category==='capital' ? 'capital' : 'operating',
+      category: x.category==='feed' ? 'feed' : x.category==='vet' ? 'health' : x.category==='capital' ? 'setup' : 'equipment',
+      description:x.item, supplier, invoice:'', amount:actual, vat:0, paid:'cash',
+      by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+    toast('Saved — and added to the ledger');
+  } else toast('Saved');
+  BUY_OPEN = '';
+  renderBuy();
+}
+function addPurchase(){
+  if(!can('write')) return toast('Only the farm team can add to the buying list');
+  const item = $('bItem').value.trim();
+  if(item.length < 2) return toast('What do we need to buy?');
+  const lo = num($('bLo').value), hi = num($('bHi').value) || lo;
+  queue('purchases', { rid:uid('pr'), id:uid('p'), item, category:$('bCat').value, priority:$('bPri').value,
+    qty:$('bQty').value.trim() || '1', est_low:lo, est_high:hi, status:'need', supplier:'', actual:0, date:'',
+    note:$('bNote').value.trim(), by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  ['bItem','bQty','bLo','bHi','bNote'].forEach(i => $(i).value = '');
+  BUY_F = 'open'; document.querySelectorAll('#buyFilter button').forEach(b => b.classList.toggle('on', b.dataset.f==='open'));
+  toast(item + ' added');
+}
+
+/* ---------- suppliers ---------- */
+function supKey(name){
+  const w = String(name||'').toLowerCase().split(/[^a-z0-9&]+/).filter(Boolean)[0] || '';
+  return (w.length >= 3 && ['local','the','online'].indexOf(w) < 0) ? w : '';
+}
+function renderSuppliers(){
+  if(!$('supList')) return;
+  const { cur, hist } = supState(), buys = buyState().cur;
+  const order = { used:0, quoted:1, option:2, avoid:3 };
+  const list = cur.filter(x => SUP_F==='all' || x.status===SUP_F)
+    .sort((a,b) => (order[a.status] ?? 9) - (order[b.status] ?? 9) || a.name.localeCompare(b.name));
+  $('supPill').textContent = cur.filter(x=>x.status==='used').length + ' used · ' + cur.length + ' total';
+  const w = can('write');
+  $('supList').innerHTML = list.length ? '<div class="card">' + list.map(x => {
+    const st = SUP_ST[x.status] || [x.status,''];
+    const k = supKey(x.name);
+    const items = k ? buys.filter(b => b.supplier.toLowerCase().indexOf(k) >= 0) : [];
+    const spent = k ? S.expenses.filter(e => String(e.supplier).toLowerCase().indexOf(k) >= 0).reduce((a,e)=>a+num(e.amount)+num(e.vat),0) : 0;
+    const isOpen = SUP_OPEN === x.id, h = hist[x.id] || [];
+    return '<div class="item" id="si-' + esc(x.id) + '"><div class="top" onclick="openSup(\'' + esc(x.id) + '\')"><span class="nm">' + esc(x.name) +
+      '</span><span class="amt">' + (spent ? R(spent) : '') + '</span></div>' +
+      '<div class="pills"><span class="pill ' + st[1] + '">' + st[0] + '</span>' + (x.category ? '<span class="pill">' + esc(x.category) + '</span>' : '') + '</div>' +
+      (x.location ? '<div class="meta">📍 ' + esc(x.location) + '</div>' : '') +
+      (x.contact ? '<div class="meta">📞 ' + linkify(x.contact) + '</div>' : '') +
+      (x.best_for ? '<div class="meta">Sells: ' + esc(x.best_for) + '</div>' : '') +
+      (x.why ? '<div class="why">' + esc(x.why) + '</div>' : '') +
+      (items.length ? '<div class="meta">On our buying list: ' + items.map(b => esc(b.item) + ' (' + (BUY_ST[b.status]||[b.status])[0].toLowerCase() + ')').join(' · ') + '</div>' : '') +
+      (spent ? '<div class="meta">Spent with them in the ledger: <b>' + R2(spent) + '</b> incl VAT</div>' : '') +
+      (isOpen ? (h.length ? '<div class="hist"><b>History</b><br>' + h.slice(0,6).map(r => (SUP_ST[r.status]||[r.status])[0] + ' — ' + whoWhen(r)).join('<br>') + '</div>' : '') +
+        (w ? supEditForm(x) : '')
+        : '<div class="meta"><a href="#" onclick="openSup(\'' + esc(x.id) + '\');return false">' + (w ? 'Update' : 'History') + '</a></div>') +
+      '</div>';
+  }).join('') + '</div>' : '<div class="card"><p class="muted">No suppliers in this view.</p></div>';
+}
+function supEditForm(x){
+  return '<div class="ed"><div class="f2"><div class="field"><label>Status</label><select id="fSt">' +
+    Object.keys(SUP_ST).map(k => '<option value="' + k + '"' + (k===x.status?' selected':'') + '>' + SUP_ST[k][0] + '</option>').join('') +
+    '</select></div><div class="field"><label>Where</label><input type="text" id="fLoc" value="' + esc(x.location) + '"></div></div>' +
+    '<div class="field"><label>Phone, email or website</label><input type="text" id="fContact" value="' + esc(x.contact) + '"></div>' +
+    '<div class="field"><label>Why</label><textarea id="fWhy" rows="3" style="width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px">' + esc(x.why) + '</textarea></div>' +
+    '<div class="btn-row"><button class="btn sm" onclick="saveSupplier(\'' + esc(x.id) + '\')">Save change</button>' +
+    '<button class="btn sm ghost" onclick="openSup(\'\')">Close</button></div></div>';
+}
+function openSup(id){ SUP_OPEN = (SUP_OPEN === id ? '' : id); renderSuppliers(); }
+function saveSupplier(id){
+  if(!can('write')) return toast('Only the farm team can change suppliers');
+  const x = supState().cur.find(r => r.id === id); if(!x) return;
+  queue('suppliers', { ...x, rid:uid('sr'), status:$('fSt').value, location:$('fLoc').value.trim(),
+    contact:$('fContact').value.trim(), why:$('fWhy').value.trim(), by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  SUP_OPEN = ''; renderBuy(); toast('Supplier updated');
+}
+function addSupplier(){
+  if(!can('write')) return toast('Only the farm team can add suppliers');
+  const name = $('sName').value.trim();
+  if(name.length < 2) return toast('The supplier\'s name');
+  queue('suppliers', { rid:uid('sr'), id:uid('s'), name, category:$('sCat').value.trim(), location:$('sLoc').value.trim(),
+    contact:$('sContact').value.trim(), best_for:$('sCat').value.trim(), status:$('sStatus').value, why:$('sWhy').value.trim(),
+    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  ['sName','sCat','sLoc','sContact','sWhy'].forEach(i => $(i).value = '');
+  toast(name + ' added');
+}
+document.querySelectorAll('#buyTabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#buyTabs button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelectorAll('.usec').forEach(x => x.classList.remove('on'));
+  $('u-' + b.dataset.u).classList.add('on');
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+document.querySelectorAll('#buyFilter button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#buyFilter button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); BUY_F = b.dataset.f; BUY_OPEN = ''; renderBuy();
+});
+document.querySelectorAll('#supFilter button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#supFilter button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); SUP_F = b.dataset.f; SUP_OPEN = ''; renderSuppliers();
+});
+
 /* ---------- team ---------- */
 async function loadTeam(quiet){
   if(!isAdmin()) return;
@@ -1855,8 +2926,10 @@ function drawTeam(users, codes, mine){
   const act  = users.filter(u=>u.status!=='pending');
   $('teamPill').textContent = act.length + ' member' + (act.length===1?'':'s');
   $('teamPill').className = 'pill g';
-  $('navBadge').style.display = pend.length ? 'grid' : 'none';
-  $('navBadge').textContent = pend.length;
+  document.querySelectorAll('.sb-team').forEach(el => {
+    el.style.display = pend.length ? 'grid' : 'none';
+    el.textContent = pend.length;
+  });
 
   $('pendingBox').innerHTML = pend.length ? '<div class="alert gold"><span class="ic">🙋</span><div><b>' +
     pend.length + ' ' + (pend.length===1?'person is':'people are') + ' requesting an account.</b> ' +
@@ -1922,7 +2995,8 @@ function renderSetup(){
   const set = [['pTraySize','tray_size'],['pTray','tray_price'],['pSingle','single_price'],
     ['pTarget','target_tray_price'],['pBagKg','bag_kg'],['pBagPrice','bag_price'],
     ['pGrams','grams_per_bird'],['pPayroll','payroll_month'],['pWater','water_month'],
-    ['pOther','other_month'],['pTargetWk','weekly_target'],['pLead','lead_days'],['pCapex','open_capex']];
+    ['pOther','other_month'],['pTargetWk','weekly_target'],['pLead','lead_days'],['pCapex','open_capex'],
+    ['pND','nd_interval'],['pWorm','deworm_interval'],['pMite','mite_interval'],['pWeigh','weigh_interval']];
   set.forEach(([id,k]) => { const el=$(id); if(el && document.activeElement!==el) el.value = S.settings[k]; });
 
   $('traySize').textContent = stN('tray_size');
@@ -1981,7 +3055,8 @@ function saveSettings(){
   const set = [['pTraySize','tray_size'],['pTray','tray_price'],['pSingle','single_price'],
     ['pTarget','target_tray_price'],['pBagKg','bag_kg'],['pBagPrice','bag_price'],
     ['pGrams','grams_per_bird'],['pPayroll','payroll_month'],['pWater','water_month'],
-    ['pOther','other_month'],['pTargetWk','weekly_target'],['pLead','lead_days'],['pCapex','open_capex']];
+    ['pOther','other_month'],['pTargetWk','weekly_target'],['pLead','lead_days'],['pCapex','open_capex'],
+    ['pND','nd_interval'],['pWorm','deworm_interval'],['pMite','mite_interval'],['pWeigh','weigh_interval']];
   set.forEach(([id,k]) => { if($(id) && $(id).value !== '') S.settings[k] = num($(id).value); });
   S.settingsDirty = true; save(); renderAll(); syncNow(true);
   toast('Saved');
@@ -1999,6 +3074,13 @@ function exportCSV(which){
     head = 'date,eggs,broken,feed_kg,water_l,note,by\n';
     rows = [...S.records].sort((a,b)=>String(a.date).localeCompare(String(b.date)))
       .map(r => [r.date,r.eggs,r.broken,r.feed,r.water,'"'+String(r.note||'').replace(/"/g,'""')+'"',r.by].join(','));
+  } else if(which === 'purchases'){
+    head = 'item,status,priority,where,qty,est_from,est_to,supplier,actual,date,why,last_changed_by\n';
+    rows = buyState().cur.map(x => [x.item,x.status,x.priority,x.category,x.qty,x.est_low,x.est_high,x.supplier,
+      x.actual,x.date,x.note,x.by].map(csvCell).join(','));
+  } else if(which === 'suppliers'){
+    head = 'name,status,sells,location,contact,best_for,why,last_changed_by\n';
+    rows = supState().cur.map(x => [x.name,x.status,x.category,x.location,x.contact,x.best_for,x.why,x.by].map(csvCell).join(','));
   } else {
     head = 'date,customer,trays,singles,eggs,amount,paid,by\n';
     rows = [...S.sales].sort((a,b)=>String(a.date).localeCompare(String(b.date)))
@@ -2055,22 +3137,41 @@ function applyRole(){
   document.querySelectorAll('#v-setup .card.admin').forEach(el => el.classList.toggle('locked', !admin));
   document.querySelectorAll('.money-only').forEach(el => el.classList.toggle('locked', !can('money')));
   document.querySelectorAll('.recon-only').forEach(el => el.classList.toggle('locked', !can('recon')));
-  document.querySelector('nav button[data-v="team"]').style.display = isAdmin() ? '' : 'none';
+  document.querySelectorAll('.adm').forEach(el => el.style.display = isAdmin() ? '' : 'none');
+  document.querySelectorAll('.write-only').forEach(el => el.style.display = write ? '' : 'none');
   if(!isAdmin() && $('v-team').classList.contains('on')) go('home');
 }
 function renderAll(){
-  try{
-    renderHome(); renderLists(); renderMoney(); renderBooks(); renderSetup(); applyRole();
-  }catch(e){ console.error('render', e); }
+  const parts = [renderHome, renderLists, renderMoney, renderBooks, renderSetup, renderTasks,
+                 renderVisitors, renderBuyQuiet, applyRole, decorateTips];
+  parts.forEach(fn => { try{ fn(); }catch(e){ console.error(fn.name, e); } });
 }
+
+/* ---------- navigation: bottom bar, sidebar and the More sheet ---------- */
+const MORE_VIEWS = ['buy','kb','help','team','setup'];
 function go(v){
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x.dataset.v===v));
+  if(v === 'more'){ openSheet(); return; }
+  closeSheet();
+  if(!$('v-'+v)) v = 'home';
+  document.querySelectorAll('#side button, nav#bottom button').forEach(x => {
+    const on = x.dataset.v === v || (x.dataset.v === 'more' && MORE_VIEWS.indexOf(v) >= 0);
+    x.classList.toggle('on', on);
+  });
   document.querySelectorAll('.view').forEach(x => x.classList.remove('on'));
   $('v-'+v).classList.add('on');
   if(v==='team') loadTeam();
+  if(v==='kb') renderKB();
+  if(v==='help') renderHelp();
+  if(v==='tasks') renderTasks();
+  if(v==='buy') renderBuy();
+  try{ history.replaceState(null,'','#'+v); }catch(e){}
   window.scrollTo({ top:0, behavior:'smooth' });
 }
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => go(b.dataset.v));
+function openSheet(){ $('sheet').classList.add('on'); }
+function closeSheet(){ $('sheet').classList.remove('on'); }
+document.querySelectorAll('#side button, nav#bottom button, #sheet button[data-v]')
+  .forEach(b => b.onclick = () => go(b.dataset.v));
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet(); hideTip(); } });
 document.querySelectorAll('#bookTabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#bookTabs button').forEach(x => x.classList.remove('on'));
   b.classList.add('on');
@@ -2116,9 +3217,15 @@ setInterval(() => { if(S.auth.token && navigator.onLine) syncNow(true); }, 12000
   const sp = document.querySelector('#splash img');
   if(sp) ['gl1','gl2','gl3'].forEach(id => { const e=$(id); if(e) e.src = sp.src; });
   const mark = $('hdrLogo'); if(mark) mark.src = 'data:image/png;base64,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';
+  const side = $('sideLogo'); if(side && mark) side.src = mark.src;
+  const foot = $('sideFoot'); if(foot) foot.textContent = 'Flock Tracker ' + APP_VERSION;
 })();
 renderAll();
 boot();
+(function(){                                   // open the screen named in the link, e.g. …/#kb
+  const h = (location.hash || '').replace('#','');
+  if(h && document.getElementById('v-' + h)) setTimeout(() => { try { go(h); } catch(e){} }, 0);
+})();
 setTimeout(() => { const sp=$('splash'); if(sp){ sp.classList.add('gone'); setTimeout(()=>sp.remove(),450); } }, 850);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js').then(reg => {
