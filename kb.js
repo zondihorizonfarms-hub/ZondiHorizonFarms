@@ -753,6 +753,7 @@ window.KB = [
     ['Buying list, quotes and supplier contacts','Buying (under More on a phone)'],
     ['Build checklist and equipment register','Tasks → Build, Tasks → Equipment'],
     ['Corrections and deletions','Books → Audit trail'],
+    ['Everything, day by day','Books → Every entry'],
     ['Finance Policy, bridge loan, company history','Knowledge → Our company']
   ]) +
   '<h3>The habits</h3>' +
@@ -918,6 +919,15 @@ window.KB = [
    go: "view" or "view:subtab" for the "Take me there" button.
    ===================================================================== */
 window.HELP = [
+{ id:'where', icon:'🗺️', title:'Where to find everything', tags:'find where record history day one books every entry sales september',
+  body:'<ul><li><b>Every entry since day one</b> — Books → <b>📜 Every entry</b>. Pick a month or one day (e.g. 1 September) and see every sale, egg count, payment, delivery, visitor and tick for that day. Search by customer, supplier or invoice.</li>' +
+  '<li><b>Profit and loss by month</b> — Books → Profit &amp; loss.</li><li><b>Every rand out</b> — Books → Ledger.</li>' +
+  '<li><b>Corrections</b> — Books → Audit trail.</li><li><b>What to buy and why</b> — Buying (under More on a phone).</li>' +
+  '<li><b>Jobs and when they are due</b> — Tasks (Health and Equipment show what is due and what is up to date).</li>' +
+  '<li><b>Company history, policies and the farming library</b> — Knowledge.</li></ul>', go:'money:days' },
+{ id:'tickdate', icon:'📅', title:'Ticking a job with the date it was done', tags:'tick date done health equipment replaced reminder',
+  body:'<p>In Tasks → Health and Tasks → Equipment, tap a job and enter <b>the date it was really done</b> (and a note). It leaves the to-do list and moves to <b>Up to date</b>, ' +
+  'showing how long it lasts and when it is next due. It comes back onto the to-do list a set number of days before it is due — the CEO or a manager can change that with <b>Change timing</b>.</p>', go:'tasks' },
 { id:'fix', icon:'✎', title:'Fixing or deleting an entry', tags:'edit correct delete mistake wrong fix change',
   body:'<p>Tap <b>✎ Fix</b> beside any entry — daily records, sales, weights, health, feed, water, visitors, or the ledger (CEO and managers). ' +
   'Change it or delete it, and give the reason. The old version is kept in <b>Books → Audit trail</b>, and the accountant or CEO accepts or queries it.</p>' +

@@ -12,7 +12,7 @@
    cached page is served immediately.
    --------------------------------------------------------------- */
 
-const CACHE = 'zondi-v3-3';
+const CACHE = 'zondi-v3-4';
 const SHELL = ['./', './index.html', './kb.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 

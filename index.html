@@ -797,7 +797,8 @@ nav#bottom .badge{top:3px}
 <!-- ============ BOOKS ============ -->
 <section class="view has-sub" id="v-money">
   <div class="segs" id="bookTabs">
-    <button class="on" data-b="pl">📘 Profit &amp; loss</button>
+    <button class="on" data-b="days">📜 Every entry</button>
+    <button data-b="pl">📘 Profit &amp; loss</button>
     <button data-b="price">💰 Price</button>
     <button data-b="ledger">🧾 Ledger</button>
     <button data-b="recon">✅ Reconcile</button>
@@ -805,7 +806,28 @@ nav#bottom .badge{top:3px}
   </div>
 
   <!-- ---- P&L ---- -->
-  <div class="bsec on" id="b-pl">
+  <div class="bsec on" id="b-days">
+    <div id="foundBox"></div>
+    <div class="card">
+      <h2 data-tip="everyentry">Every entry, day by day <span class="pill" id="dayPill">—</span></h2>
+      <p class="muted" style="margin:-4px 0 10px">Everything ever recorded at the farm — eggs, sales, money out, feed, water, health,
+        weights, visitors, buying, checklists and corrections — newest first. Pick a month, or one day.</p>
+      <div class="f2">
+        <div class="field"><label>Month</label><select id="dayMonth" onchange="$('dayDate').value='';renderDays()"></select></div>
+        <div class="field"><label>Or one day</label><input type="date" id="dayDate" onchange="renderDays()"></div>
+      </div>
+      <div class="field"><label>Search</label><input type="text" id="dayQ" placeholder="a customer, supplier, invoice, amount…" oninput="renderDays()"></div>
+      <div class="segs" id="dayFilter">
+        <button class="on" data-f="all">All</button><button data-f="sale">Sales</button><button data-f="money">Money out</button>
+        <button data-f="farm">Eggs &amp; birds</button><button data-f="buy">Buying</button><button data-f="check">Checklists</button>
+        <button data-f="audit">Corrections</button>
+      </div>
+    </div>
+    <div id="dayList"></div>
+    <div class="card"><h2>Since day one</h2><div class="lines" id="sinceBox"></div></div>
+  </div>
+
+  <div class="bsec" id="b-pl">
     <div class="card">
       <h2>The company, month by month</h2>
       <p class="muted" style="margin:0 0 10px">Every rand in and out since the farm started.
@@ -1058,6 +1080,11 @@ nav#bottom .badge{top:3px}
         <div class="field"><label data-tip="counter">Where it is sold</label><select id="bCat"></select></div>
         <div class="field"><label>When</label><select id="bPri"></select></div>
       </div>
+      <div class="f2">
+        <div class="field"><label>How important</label><select id="bImp"><option value="critical">🔴 Critical</option>
+          <option value="important" selected>🟠 Important</option><option value="nice">⚪ Nice to have</option></select></div>
+        <div class="field"><label>Why not bought yet</label><input type="text" id="bWhyNot" placeholder="e.g. waiting for egg money"></div>
+      </div>
       <div class="field"><label>Why we need it</label><input type="text" id="bNote" placeholder="What it is for"></div>
       <button class="btn" onclick="addPurchase()">Add to the list</button>
     </div>
@@ -1294,7 +1321,7 @@ nav#bottom .badge{top:3px}
    Owner: paste the Apps Script /exec link below, save, upload.
    ========================================================== */
 const FARM_URL = "https://script.google.com/macros/s/AKfycbzlbNrQGhDzznik74aCiFhxYZzTwHXK8xGJBaBMwItPAMzn-QlJRwAK66lzBWTG40xw/exec";
-const APP_VERSION = '3.3';
+const APP_VERSION = '3.4';
 
 const COUNTRIES = [
   ['ZA','🇿🇦','27','South Africa'], ['GB','🇬🇧','44','United Kingdom'], ['ZW','🇿🇼','263','Zimbabwe'],
@@ -1718,7 +1745,7 @@ function normalise(j){
                   category:x.category||'hardware', priority:String(x.priority||'2'), qty:String(x.qty==null?'':x.qty),
                   est_low:num(x.est_low), est_high:num(x.est_high), status:x.status||'need', supplier:String(x.supplier||''),
                   actual:num(x.actual), date:x.date?String(x.date).slice(0,10):'', note:String(x.note||''),
-                  by:x.by||'', ts:num(x.ts) }));
+                  by:x.by||'', ts:num(x.ts), importance:String(x.importance||''), why_not:String(x.why_not||'') }));
   S.suppliers = (j.suppliers||[]).map(x => ({ rid:String(x.rid), id:String(x.id), name:String(x.name||''),
                   category:String(x.category||''), location:String(x.location||''), contact:String(x.contact||''),
                   best_for:String(x.best_for||''), status:x.status||'option', why:String(x.why||''),
@@ -2516,30 +2543,19 @@ function renderTasks(){
   $('t-monthly').innerHTML = ro + listCard('This month · ' + monthName(ym), 'Do these in the first week of the month.',
     mrows, mn, MONTHLY.length);
 
-  /* health — due dates */
-  let late = 0;
-  const hrows = HEALTH.map(h => {
+  /* health — tick with the date it was done; it moves to "up to date" and comes back before it is due */
+  const hItems = HEALTH.map(h => {
     const [id, title, detail, key, kb] = h;
-    const every = stN(key) || 30, last = lastHealth(h);
-    let cls = 'none', label = 'no record yet';
-    if(last){
-      const left = every - days(last, t);
-      if(left < 0){ cls='late'; label = Math.abs(left) + ' days overdue'; late++; }
-      else if(left <= 7){ cls='soon'; label = 'due in ' + left + ' day' + (left===1?'':'s'); }
-      else { cls='ok'; label = 'due ' + fmtD(addD(last, every)); }
-    }
-    return '<div class="chk locked-row"><span class="box" style="background:var(--' +
-      (cls==='late'?'red':cls==='soon'?'gold':cls==='ok'?'accent':'blue') + ');border:none">' +
-      (cls==='ok'?'✓':cls==='late'?'!':'•') + '</span><span class="body"><div class="t">' + esc(title) + '</div>' +
-      '<div class="d">' + esc(detail) + '</div><div class="d" style="margin-top:5px">Every ' + every + ' days · ' +
-      (last ? 'last done ' + fmtD(last) : 'never recorded') + ' · <a href="#" onclick="openKB(\'' + kb + '\');return false">Why?</a></div>' +
-      (can('write') ? '<button class="btn sm ghost" style="width:auto;margin-top:8px;padding:7px 12px" onclick="doneToday(\'' + id + '\')">Done today</button>' : '') +
-      '</span><span class="due ' + cls + '">' + label + '</span></div>';
-  }).join('');
-  $('t-health').innerHTML = ro + '<div class="card"><h2>Health programme <span class="pill ' + (late?'r':'g') + '">' +
-    (late ? late + ' overdue' : 'up to date') + '</span></h2><p class="muted" style="margin:-4px 0 8px">Due dates come ' +
-    'from the last time each job was ticked here or recorded under Record → Health. Change the intervals in Setup.</p>' +
-    hrows + '</div><div class="card"><h2>Rules that never change</h2><ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6">' +
+    const every = stN(key) || 30, last = lastHealth(h), tk = lastTick('health', id);
+    return { list:'health', id, name:title, detail, every, remind:remindFor('h:' + id, every, 'service'),
+             last, lastBy: tk && tk.period === last ? tk.by : '', lastNote: tk && tk.period === last ? tk.note : '',
+             life:'', kb, doneWord:'Done' };
+  });
+  const hs = svcSplit(hItems, t);
+  const late = hs.late;
+  $('t-health').innerHTML = ro + svcCards('Health programme', hs, 'Tick a job with the date it was done. It moves to <b>Up to date</b> ' +
+    'and comes back onto the to-do list before it is next due. Dates also come from Record → Health. Intervals are in Setup.') +
+    '<div class="card"><h2>Rules that never change</h2><ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6">' +
     '<li>Never vaccinate visibly sick birds.</li><li>Never put vaccine in chlorinated or disinfected water — it kills it.</li>' +
     '<li>Every medicine goes in Record → Health with its withdrawal days. No eggs are sold until it passes.</li>' +
     '<li>More than 2–3 birds sick or dying in a week: call the vet. Sudden deaths with swollen heads or twisted necks: ' +
@@ -2686,6 +2702,7 @@ function equipToBuy(id){
   if(cur && (cur.status === 'need' || cur.status === 'ordered' || cur.status === 'quoted')) return toast('Already on the buying list');
   queue('purchases', { rid:uid('pr'), id:pid, item:it[1] + ' (replacement)', category:'hardware', priority:'2', qty:'1',
     est_low:0, est_high:0, status:'need', supplier:'', actual:0, date:'', note:'From the equipment register — ' + it[4] + '.',
+    importance:'important', why_not:'Due for replacement — just added from the equipment register',
     by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
   toast('Added to the buying list');
 }
@@ -2694,6 +2711,117 @@ function lastEquip(id){
   S.checks.forEach(c => { if(c.list === 'equip' && c.item === id && c.done && c.period > last) last = c.period; });
   return last;
 }
+/* ---------- tick-with-a-date: shared by the Health programme and the Equipment register ----------
+   Tick an item with the date it was really done. It leaves the to-do list, shows in "Up to date"
+   with its lifespan and next due date, and comes back onto the to-do list N days before it is due. */
+let SVC_OPEN = '';
+function lastTick(list, id){
+  let best = null;
+  S.checks.forEach(c => { if(c.list === list && c.item === id && c.done &&
+    (!best || c.period > best.period || (c.period === best.period && c.ts > best.ts))) best = c; });
+  return best;
+}
+function remindFor(key, every, kind){
+  try{ const o = JSON.parse(S.settings.remind_days || '{}'); if(num(o[key]) > 0) return num(o[key]); }catch(e){}
+  if(kind === 'replace' || kind === 'once') return Math.min(30, Math.max(3, Math.round(every * 0.1)));
+  return Math.min(7, Math.max(1, Math.round(every / 4)));
+}
+function svcSplit(items, t){
+  const todo = [], ok = []; let late = 0;
+  const yr = d => fmtD(d) + (d.slice(0,4) !== t.slice(0,4) ? ' ' + d.slice(0,4) : '');
+  items.forEach(o => {
+    if(!o.last){ o.state = 'none'; o.label = 'not recorded yet'; todo.push(o); return; }
+    o.due = addD(o.last, o.every); o.back = addD(o.due, -o.remind);
+    o.dueTxt = yr(o.due); o.backTxt = yr(o.back);
+    const left = days(t, o.due);
+    if(left < 0){ o.state = 'late'; o.label = Math.abs(left) + ' days overdue'; late++; todo.push(o); }
+    else if(left <= o.remind){ o.state = 'soon'; o.label = left === 0 ? 'due today' : 'due in ' + left + ' day' + (left === 1 ? '' : 's'); todo.push(o); }
+    else { o.state = 'ok'; o.label = 'next ' + o.dueTxt; ok.push(o); }
+  });
+  const rank = { late:0, soon:1, none:2 };
+  todo.sort((a,b) => rank[a.state] - rank[b.state] || String(a.due||'').localeCompare(String(b.due||'')));
+  ok.sort((a,b) => a.due.localeCompare(b.due));
+  return { todo, ok, late };
+}
+function svcForm(o){
+  const k = o.list + '-' + o.id;
+  return '<div class="ed" onclick="event.stopPropagation()"><div class="f2"><div class="field"><label>' + o.doneWord + ' on</label>' +
+    '<input type="date" id="sd-' + k + '" value="' + today() + '" max="' + today() + '"></div>' +
+    '<div class="field"><label>Note (optional)</label><input type="text" id="sn-' + k + '" placeholder="' +
+      (o.kind === 'replace' ? 'e.g. bought at Builders, R89' : o.list === 'health' ? 'e.g. La Sota, vial batch no.' : 'e.g. cleaned, all fine') + '"></div></div>' +
+    '<div class="btn-row"><button class="btn sm" onclick="svcSave(\'' + o.list + '\',\'' + o.id + '\')">Save</button>' +
+    '<button class="btn sm ghost" onclick="svcOpen(\'\')">Cancel</button></div></div>';
+}
+function svcRow(o){
+  const w = can('write'), k = o.list + '|' + o.id, open = SVC_OPEN === k;
+  const colour = o.state === 'late' ? 'red' : o.state === 'soon' ? 'gold' : '';
+  const box = o.state === 'ok' ? '<span class="box" style="background:var(--accent);border:none;color:#fff">✓</span>'
+                              : '<span class="box"' + (colour ? ' style="border-color:var(--' + colour + ')"' : '') + '></span>';
+  const kindTxt = o.kind === 'replace' ? 'Replace' : o.kind === 'once' ? 'Bought once' : o.kind === 'service' ? 'Service' : '';
+  const bits = [];
+  if(o.life) bits.push('Lasts ' + esc(o.life.replace(/^About/, 'about')));
+  bits.push('every ' + o.every + ' days');
+  if(o.last) bits.push('last ' + o.doneWord.toLowerCase() + ' ' + fmtD(o.last) + (o.lastBy ? ' by ' + esc(o.lastBy) : ''));
+  const back = o.state === 'ok' ? '<div class="d" style="margin-top:4px">📅 Next due <b>' + o.dueTxt + '</b> · back on the to-do list from <b>' +
+    o.backTxt + '</b> (' + o.remind + ' days before)</div>' : '';
+  return '<div class="chk' + (w ? '' : ' locked-row') + '" id="svc-' + o.list + '-' + o.id + '"' +
+    (w ? ' onclick="svcOpen(\'' + k + '\')"' : '') + '>' + box +
+    '<span class="body"><div class="t">' + esc(o.name) + (kindTxt ? ' <span class="pill" style="font-size:10px">' + kindTxt + '</span>' : '') + '</div>' +
+    (o.detail ? '<div class="d">' + esc(o.detail) + '</div>' : '') +
+    '<div class="d" style="margin-top:5px">' + bits.join(' · ') + '</div>' + back +
+    (o.lastNote ? '<div class="d">📝 ' + esc(o.lastNote) + '</div>' : '') +
+    '<div class="d" style="margin-top:5px">' + (w ? '<a href="#" onclick="event.stopPropagation();svcOpen(\'' + k + '\');return false">' +
+      (o.last ? 'Record again' : 'Tick with the date') + '</a> · ' : '') +
+      '<a href="#" onclick="event.stopPropagation();openKB(\'' + o.kb + '\');return false">Why?</a>' +
+      (can('admin') ? ' · <a href="#" onclick="event.stopPropagation();svcChange(\'' + o.list + '\',\'' + o.id + '\');return false">Change timing</a>' : '') +
+      (w && o.kind === 'replace' ? ' · <a href="#" onclick="event.stopPropagation();equipToBuy(\'' + o.id + '\');return false">🛒 Add to buying list</a>' : '') +
+    '</div>' + (open ? svcForm(o) : '') +
+    '</span><span class="due ' + (o.state === 'none' ? '' : o.state) + '">' + o.label + '</span></div>';
+}
+function svcCards(title, st, intro){
+  return '<div class="card"><h2>' + title + ' <span class="pill ' + (st.late ? 'r' : st.todo.length ? 'y' : 'g') + '">' +
+    (st.late ? st.late + ' overdue' : st.todo.length ? st.todo.length + ' to do' : 'all up to date') + '</span></h2>' +
+    '<p class="muted" style="margin:-4px 0 0">' + intro + '</p></div>' +
+    '<div class="card"><h2>To do <span class="pill ' + (st.todo.length ? 'y' : 'g') + '">' + st.todo.length + '</span></h2>' +
+    (st.todo.length ? st.todo.map(svcRow).join('') : '<p class="muted">Nothing due. Everything is up to date.</p>') + '</div>' +
+    '<div class="card"><h2>Up to date <span class="pill g">' + st.ok.length + '</span></h2>' +
+    (st.ok.length ? st.ok.map(svcRow).join('') : '<p class="muted">Tick an item above with the date it was done and it moves here.</p>') + '</div>';
+}
+function svcOpen(k){
+  if(k && !can('write')) return;
+  SVC_OPEN = SVC_OPEN === k ? '' : k;
+  renderTasks();
+  if(SVC_OPEN){ const el = $('svc-' + SVC_OPEN.replace('|','-')); if(el) el.scrollIntoView({ block:'nearest' }); }
+}
+function svcSave(list, id){
+  if(!can('write')) return toast('Only the people doing the work can record this');
+  const k = list + '-' + id, d = $('sd-' + k).value || today(), note = $('sn-' + k).value.trim();
+  if(d > today()) return toast('That date is in the future');
+  SVC_OPEN = '';
+  queue('checks', { id:uid('k'), list, period:d, item:id, done:true, note, by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  toast('Recorded for ' + fmtD(d));
+}
+function svcChange(list, id){
+  if(!can('admin')) return toast('Only the CEO or a manager can change this');
+  let every, kind;
+  if(list === 'equip'){
+    const it = EQUIP.find(x => x[0] === id);
+    const v = prompt('Every how many days for "' + it[1] + '"?', equipEvery(id, it[3])); if(v === null) return;
+    if(!(num(v) > 0)) return toast('A number of days');
+    let o = {}; try{ o = JSON.parse(S.settings.equip_every || '{}'); }catch(e){}
+    o[id] = num(v); S.settings.equip_every = JSON.stringify(o);
+    every = num(v); kind = it[2];
+  } else {
+    const h = HEALTH.find(x => x[0] === id); every = stN(h[3]) || 30; kind = 'service';
+  }
+  const key = list === 'health' ? 'h:' + id : id;
+  const r = prompt('Put it back on the to-do list how many days before it is due?', remindFor(key, every, kind)); if(r === null) return;
+  if(!(num(r) >= 0)) return toast('A number of days');
+  let o2 = {}; try{ o2 = JSON.parse(S.settings.remind_days || '{}'); }catch(e){}
+  o2[key] = num(r); S.settings.remind_days = JSON.stringify(o2);
+  S.settingsDirty = true; save(); renderAll(); syncNow(true); toast('Saved');
+}
+
 function renderBuildEquip(){
   if(!$('t-build')) return;
   const ro = !can('write'), w = can('write');
@@ -2714,34 +2842,20 @@ function renderBuildEquip(){
     (can('admin') ? '<div class="field"><label>&nbsp;</label><button class="btn sm ghost" onclick="addSite()">+ New site / new land</button></div>' : '') + '</div>' +
     '<div class="prog"><i style="width:' + (tot?Math.round(dn/tot*100):0) + '%"></i></div></div>' + cards;
 
-  /* equipment */
-  const t = today(), start = st('equip_start') || '2026-07-22';
-  let late = 0;
-  const groups = Object.keys(EQ_KIND).map(kind => {
-    const rows = EQUIP.filter(x => x[2] === kind).map(([id, name, , def, life, todo, kb]) => {
-      const every = equipEvery(id, def), last = lastEquip(id), from = last || start;
-      const left = every - days(from, t);
-      const dueD = addD(from, every);
-      let cls = 'ok', label = 'due ' + fmtD(dueD) + (dueD.slice(0,4) !== t.slice(0,4) ? ' ' + dueD.slice(0,4) : '');
-      if(left < 0){ cls = 'late'; label = Math.abs(left) + ' days overdue'; late++; }
-      else if(left <= Math.min(14, Math.ceil(every/4))){ cls = 'soon'; label = 'due in ' + left + ' day' + (left===1?'':'s'); }
-      return '<div class="chk locked-row"><span class="box" style="background:var(--' + (cls==='late'?'red':cls==='soon'?'gold':'accent') +
-        ');border:none">' + (cls==='ok'?'✓':cls==='late'?'!':'•') + '</span><span class="body"><div class="t">' + esc(name) + '</div>' +
-        '<div class="d">' + esc(todo) + '</div>' +
-        '<div class="d" style="margin-top:5px">Lasts: ' + esc(life) + ' · every ' + every + ' days · ' +
-          (last ? 'last ' + (kind==='replace'?'replaced':'done') + ' ' + fmtD(last) : 'counted from ' + fmtD(start)) +
-          ' · <a href="#" onclick="openKB(\'' + kb + '\');return false">Why?</a>' +
-          (can('admin') ? ' · <a href="#" onclick="setEquipEvery(\'' + id + '\');return false">Change</a>' : '') + '</div>' +
-        (w ? '<div class="btn-row" style="margin-top:8px"><button class="btn sm ghost" onclick="equipDone(\'' + id + '\')">' + EQ_KIND[kind][1] + '</button>' +
-          (kind==='replace' ? '<button class="btn sm ghost" onclick="equipToBuy(\'' + id + '\')">🛒 Add to buying list</button>' : '') + '</div>' : '') +
-        '</span><span class="due ' + cls + '">' + label + '</span></div>';
-    }).join('');
-    return '<div class="card"><h2>' + EQ_KIND[kind][0] + '</h2>' + rows + '</div>';
-  }).join('');
+  /* equipment — the same tick-with-a-date pattern */
+  const t = today();
+  const items = EQUIP.map(([id, name, kind, def, life, todo, kb]) => {
+    const every = equipEvery(id, def), last = lastEquip(id), tk = lastTick('equip', id);
+    return { list:'equip', id, name, detail:todo, every, remind:remindFor(id, every, kind), last,
+             lastBy: tk ? tk.by : '', lastNote: tk ? tk.note : '', life, kb, kind,
+             doneWord: kind === 'replace' ? 'Replaced' : kind === 'once' ? 'Checked' : 'Done' };
+  });
+  const es = svcSplit(items, t);
+  const late = es.late;
   $('t-equip').innerHTML = (ro ? '<div class="alert blue"><span class="ic">👁️</span><div>You can see the register; the farm team records the work.</div></div>' : '') +
-    '<div class="card"><h2>Equipment register <span class="pill ' + (late?'r':'g') + '">' + (late ? late + ' overdue' : 'up to date') + '</span></h2>' +
-    '<p class="muted" style="margin:0">What has to be replaced, what has to be serviced, and what was bought once — how long each lasts and when it is next due. ' +
-    'Lifespans are typical figures; change any interval to match what you see.</p></div>' + groups;
+    svcCards('Equipment register', es, 'What has to be replaced, serviced, or was bought once. Tick an item with the date it was done or ' +
+      'bought — it moves to <b>Up to date</b> showing how long it lasts, and comes back onto the to-do list before it is due again. ' +
+      'Lifespans are typical figures; the CEO or a manager can change any of them.');
   document.querySelectorAll('.sb-tasks').forEach(el => {
     const n = num(el.dataset.health) + late; el.style.display = n ? 'grid' : 'none'; el.textContent = n; });
 }
@@ -2808,6 +2922,7 @@ const TIPS = {
   counter:['<b>Where it is sold.</b> No single shop sells everything. Poultry equipment shops, a registered vet counter, hardware stores and online shops each cover part of the list. Anything that goes into a bird or its water comes from the vet counter only.','buying-rules'],
   suppliers:['<b>Supplier book</b> — who we buy from, who quoted us and who else is out there, with the reason. Before a big purchase, get two comparison quotes.','buying-rules'],
   approve:['<b>Who must approve</b>, from the Finance Policy: up to R500 any one partner with a receipt · R501–R2,500 Finance and Operations together · R2,501–R10,000 all partners in writing · above R10,000 or any loan all partners and the investor, signed. Feed never waits for approval.','finance-policy'],
+  everyentry:['<b>Every entry</b> — the company record book, day by day. Tap ✎ Fix on any line to correct it; the old version goes to the audit trail.','records'],
   kpi:['<b>Key numbers</b> from the last 7 recorded days. Feed per dozen and feed cost per egg use the feed you recorded, or the normal ration where the feed box was left blank.','key-numbers'],
   audit:['<b>Audit trail</b> — nothing is ever really deleted. A correction keeps the old version, the new one, the reason and the name. Someone else then accepts it or queries it.','records'],
   ndint:['<b>Newcastle booster interval</b>. Vaccination is compulsory in South Africa. Published guidance ranges from every 4–6 weeks to every 60–90 days — set what your vet recommends.','vaccination']
@@ -2925,6 +3040,8 @@ const BUY_ST  = { need:['To buy','y'], quoted:['Quoted','b'], ordered:['Ordered'
                   hold:['On hold — do not use','r'], skip:['Not needed',''] };
 const SUP_ST  = { used:['We buy here','g'], quoted:['Quoted us','b'], option:['Option','y'], avoid:['Avoid','r'] };
 let BUY_F = 'open', SUP_F = 'all', BUY_OPEN = '', SUP_OPEN = '';
+const IMP = { critical:['🔴 Critical','r',0], important:['🟠 Important','y',1], nice:['⚪ Nice to have','',2] };
+const impRank = x => (IMP[x.importance] || ['', '', 3])[2];
 
 function csvCell(v){ return '"' + String(v==null?'':v).replace(/"/g,'""') + '"'; }
 function versions(rows){
@@ -2988,6 +3105,7 @@ function renderBuy(){
   $('buySum').innerHTML =
     '<div class="line"><span>Needed now (priority 1–2)</span><b>' + now.length + ' items · ' + (sum(now,'est_high') ? rangeTxt(sum(now,'est_low'), sum(now,'est_high')) : '—') + '</b></div>' +
     '<div class="line"><span>Priority 1 still open</span><b>' + p1.length + '</b></div>' +
+    '<div class="line"><span>🔴 Critical items not yet bought</span><b>' + open.filter(x => x.importance==='critical').length + '</b></div>' +
     '<div class="line"><span>Later (priority 3 and capital projects)</span><b>' + later.length + ' items · ' + (sum(later,'est_high') ? rangeTxt(sum(later,'est_low'), sum(later,'est_high')) : '—') + '</b></div>' +
     '<div class="line"><span>Quotes waiting for a decision</span><b>' + quotes.length + '</b></div>' +
     '<div class="line"><span>Already on the farm</span><b>' + have.length + '</b></div>' +
@@ -3001,7 +3119,7 @@ function renderBuy(){
   const w = can('write');
   $('buyList').innerHTML = BUY_PRI.map(([k, label]) => {
     const rows = list.filter(x => (x.priority||'2') === k)
-      .sort((a,b) => (a.status==='hold'?-1:0) - (b.status==='hold'?-1:0) || a.item.localeCompare(b.item));
+      .sort((a,b) => (a.status==='hold'?-1:0) - (b.status==='hold'?-1:0) || impRank(a) - impRank(b) || a.item.localeCompare(b.item));
     if(!rows.length) return '';
     return '<div class="card"><h2>' + label + ' <span class="pill">' + rows.length + '</span></h2>' + rows.map(x => {
       const st = BUY_ST[x.status] || [x.status,''];
@@ -3013,10 +3131,12 @@ function renderBuy(){
       return '<div class="item" id="bi-' + esc(x.id) + '"><div class="top" onclick="openBuy(\'' + esc(x.id) + '\')">' +
         '<span class="nm">' + esc(x.item) + '</span><span class="amt">' + (money || '') + '</span></div>' +
         '<div class="pills"><span class="pill ' + st[1] + '">' + st[0] + '</span>' +
+        (IMP[x.importance] ? '<span class="pill ' + IMP[x.importance][1] + '">' + IMP[x.importance][0] + '</span>' : '') +
         (appr ? '<span class="pill b" onclick="showTip(\'approve\')" style="cursor:pointer">✍ ' + appr + '</span>' : '') +
         '<span class="pill">' + esc(BUY_CAT[x.category] || x.category) + '</span></div>' +
         '<div class="meta">' + [x.qty ? 'Qty ' + esc(x.qty) : '', x.supplier ? '🏪 ' + esc(x.supplier) : '',
           x.date ? fmtD(x.date) : ''].filter(Boolean).join(' · ') + '</div>' +
+        (x.why_not && x.status !== 'bought' ? '<div class="why" style="color:var(--red)"><b>Not bought yet because:</b> ' + esc(x.why_not) + '</div>' : '') +
         (x.note ? '<div class="why">' + esc(x.note) + '</div>' : '') +
         (isOpen ? buyHistory(h) + (w ? buyEditForm(x) : '') : '<div class="meta"><a href="#" onclick="openBuy(\'' + esc(x.id) +
           '\');return false">' + (w ? 'Update' : 'History') + (h.length > 1 ? ' (' + h.length + ' changes)' : '') + '</a></div>') +
@@ -3040,6 +3160,9 @@ function buyEditForm(x){
     '<div class="f2"><div class="field"><label>Supplier</label><input type="text" id="eSup" list="supNames" value="' + esc(x.supplier) + '">' +
       '<datalist id="supNames">' + sups.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist></div>' +
     '<div class="field"><label>Price paid or quoted (R)</label><input type="number" id="eAmt" step="0.01" inputmode="decimal" value="' + (x.actual || '') + '"></div></div>' +
+    '<div class="f2"><div class="field"><label>How important</label><select id="eImp">' +
+      Object.keys(IMP).map(k => '<option value="' + k + '"' + (k===x.importance?' selected':'') + '>' + IMP[k][0] + '</option>').join('') +
+    '</select></div><div class="field"><label>If not bought — why not?</label><input type="text" id="eWhyNot" value="' + esc(x.why_not) + '" placeholder="e.g. waiting for egg money"></div></div>' +
     '<div class="field"><label>Why / notes</label><textarea id="eNote" rows="3" style="width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px">' + esc(x.note) + '</textarea></div>' +
     (can('money') ? '<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:10px"><input type="checkbox" id="eLedger" checked style="width:auto"> ' +
       'When marked "Have it" with a price, also add it to the ledger</label>' : '<p class="muted" style="margin:0 0 10px">The CEO or a manager records the money in Books → Ledger.</p>') +
@@ -3054,7 +3177,9 @@ function savePurchase(id){
   const status = $('eSt').value, actual = num($('eAmt').value), supplier = $('eSup').value.trim(),
         date = $('eDate').value || today(), note = $('eNote').value.trim();
   if(status === 'bought' && !supplier) return toast('Who did we buy it from?');
-  const row = { ...x, rid:uid('pr'), status, actual, supplier, date, note,
+  const importance = $('eImp') ? $('eImp').value : x.importance, why_not = $('eWhyNot') ? $('eWhyNot').value.trim() : x.why_not;
+  if(status !== 'bought' && status !== 'skip' && !why_not) return toast('Say why it is not bought yet');
+  const row = { ...x, rid:uid('pr'), status, actual, supplier, date, note, importance, why_not: status === 'bought' ? '' : why_not,
                 by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() };
   delete row.hist;
   queue('purchases', row);
@@ -3076,8 +3201,9 @@ function addPurchase(){
   const lo = num($('bLo').value), hi = num($('bHi').value) || lo;
   queue('purchases', { rid:uid('pr'), id:uid('p'), item, category:$('bCat').value, priority:$('bPri').value,
     qty:$('bQty').value.trim() || '1', est_low:lo, est_high:hi, status:'need', supplier:'', actual:0, date:'',
-    note:$('bNote').value.trim(), by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
-  ['bItem','bQty','bLo','bHi','bNote'].forEach(i => $(i).value = '');
+    note:$('bNote').value.trim(), importance:$('bImp').value, why_not:$('bWhyNot').value.trim() || 'Just added to the list',
+    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  ['bItem','bQty','bLo','bHi','bNote','bWhyNot'].forEach(i => $(i).value = '');
   BUY_F = 'open'; document.querySelectorAll('#buyFilter button').forEach(b => b.classList.toggle('on', b.dataset.f==='open'));
   toast(item + ' added');
 }
@@ -3395,6 +3521,129 @@ function renderKPIs(){
     L('Broken and dirty', brokenPct.toFixed(1) + '%', 'aim for under about 3%; rising means trays, collection or shells', brokenPct > 5 ? 'red' : '') +
     L('Deaths since placement', mort.toFixed(1) + '% (' + c.deaths + ' birds)', 'Hy-Line: about 5% over the whole lay to 80 weeks', mort > 5 ? 'red' : '');
 }
+
+/* =====================================================================
+   EVERY ENTRY, DAY BY DAY — the whole record of the farm in one place
+   ===================================================================== */
+let DAY_F = 'all';
+const tsDate = ts => { try{ return ts ? new Date(ts).toISOString().slice(0,10) : ''; }catch(e){ return ''; } };
+function allEvents(){
+  const E = [], add = (date, type, icon, text, by, table, rec) => { if(date) E.push({ date:String(date).slice(0,10), type, icon, text,
+    by: by === 'founding import' ? 'from the paper records' : (by||''), table, rec }); };
+  batches().forEach(b => add(b.arrived, 'farm', '🐔', '<b>' + esc(b.name) + (String(b.arrived) <= today() ? ' arrived' : ' expected') + '</b> — ' + num(b.count) + ' Hy-Line Brown hens at ' + num(b.ageAtArrival) + ' weeks', ''));
+  S.records.forEach(r => add(r.date, 'farm', '🥚', '<b>' + num(r.eggs) + ' eggs collected</b>' + (num(r.broken) ? ' · ' + num(r.broken) + ' broken' : '') +
+    (r.feed !== '' && r.feed != null ? ' · ' + num(r.feed) + ' kg feed' : '') + (r.water !== '' && r.water != null ? ' · ' + num(r.water) + ' L water' : '') +
+    (r.note ? ' · ' + esc(r.note) : ''), r.by, 'records', r));
+  S.sales.forEach(x => add(x.date, 'sale', '💵', '<b>Sale: ' + esc(x.customer) + '</b> — ' + num(x.eggs) + ' eggs · ' + R2(num(x.amount)) +
+    (x.paid && x.paid !== 'cash' ? ' · ' + esc(x.paid) : '') + (x.note ? '<br><span class="muted">' + esc(x.note) + '</span>' : ''), x.by, 'sales', x));
+  S.expenses.forEach(x => add(x.date, 'money', '🧾', '<b>Money out: ' + R2(num(x.amount)) + '</b>' + (num(x.vat) ? ' + VAT ' + R2(num(x.vat)) : '') + ' — ' +
+    esc(x.description || x.category) + (x.supplier ? ' · ' + esc(x.supplier) : '') + (x.invoice ? ' · invoice ' + esc(x.invoice) : '') +
+    (x.kind === 'capital' ? ' <span class="pill b">capital</span>' : ''), x.by, 'expenses', x));
+  S.feed.forEach(f => add(f.date, 'farm', '🌾', '<b>Feed delivered: ' + num(f.bags) + ' bags</b>' + (num(f.price) ? ' at ' + R(num(f.price)) : '') + (f.sup ? ' · ' + esc(f.sup) : ''), f.by, 'feed', f));
+  S.water.forEach(w => add(w.date, 'farm', '💧', '<b>Water: ' + num(w.litres) + ' L</b>' + (w.source ? ' · ' + esc(w.source) : '') + (num(w.cost) ? ' · ' + R(num(w.cost)) : ''), w.by, 'water', w));
+  S.health.forEach(h => add(h.date, 'farm', '🩺', '<b>Health: ' + esc(h.kind) + '</b>' + (num(h.birds) ? ' · ' + num(h.birds) + ' bird(s)' : '') +
+    (h.treatment ? ' · ' + esc(h.treatment) : '') + (h.safe_from ? ' · no egg sales until ' + fmtD(h.safe_from) : '') + (h.note ? ' · ' + esc(h.note) : ''), h.by, 'health', h));
+  const wd = {}; S.weights.forEach(w => { (wd[w.date] = wd[w.date] || []).push(w); });
+  Object.keys(wd).forEach(d => { const l = wd[d], avg = l.reduce((a,w)=>a+num(w.kg),0)/l.length;
+    add(d, 'farm', '⚖️', '<b>Weighed ' + l.length + ' bird' + (l.length===1?'':'s') + '</b> · average ' + avg.toFixed(2) + ' kg · ' +
+      l.filter(w=>w.verdict==='UNDER').length + ' under standard', l[0].by); });
+  S.visitors.forEach(v => add(v.date, 'check', '🚪', '<b>Visitor: ' + esc(v.name) + '</b>' + (v.reason ? ' · ' + esc(v.reason) : '') +
+    (v.own_poultry ? ' · <span class="pill r">keeps poultry</span>' : ''), v.by, 'visitors', v));
+  buyState().cur.filter(x => x.status === 'bought' && x.date).forEach(x => add(x.date, 'buy', '🛒', '<b>Bought: ' + esc(x.item) + '</b>' +
+    (x.supplier ? ' · ' + esc(x.supplier) : '') + (x.actual ? ' · ' + R2(x.actual) : ''), x.by === 'founding import' ? '' : x.by));
+  buyState().cur.filter(x => x.status === 'quoted' && x.date).forEach(x => add(x.date, 'buy', '📄', '<b>Quote: ' + esc(x.item) + '</b>' +
+    (x.supplier ? ' · ' + esc(x.supplier) : ''), ''));
+  const ck = {};
+  S.checks.forEach(c => {
+    if(c.list === 'health' || c.list === 'equip'){
+      if(!c.done) return;
+      const nm = c.list === 'health' ? (HEALTH.find(h => h[0] === c.item) || [,c.item])[1] : (EQUIP.find(e => e[0] === c.item) || [,c.item])[1];
+      add(c.period, 'check', c.list === 'health' ? '💉' : '🔧', '<b>' + esc(nm) + '</b> — done' + (c.note ? ' · ' + esc(c.note) : ''), c.by);
+    } else if(c.list === 'daily'){ const k = c.period; ck[k] = ck[k] || {}; ck[k][c.item] = c; }
+  });
+  Object.keys(ck).forEach(d => { const done = Object.values(ck[d]).filter(c => c.done);
+    if(done.length) add(d, 'check', '✅', '<b>Daily checklist: ' + done.length + ' job' + (done.length===1?'':'s') + ' ticked</b> · ' +
+      [...new Set(done.map(c => c.by))].map(esc).join(', ')); });
+  S.recon.forEach(r => add(r.ts ? tsDate(r.ts) : r.period + '-28', 'money', r.status === 'matched' ? '📗' : '❓',
+    '<b>' + monthName(r.period) + ' ' + (r.status === 'matched' ? 'signed off — matched' : 'queried') + '</b>' +
+    [r.eggs_note, r.cash_note, r.note].filter(Boolean).map(n => '<br><span class="muted">' + esc(n) + '</span>').join(''), r.by === 'founding import' ? 'from the paper records' : r.by));
+  S.audit.filter(a => a.action !== 'review').forEach(a => add(tsDate(a.ts), 'audit', '✎',
+    '<b>' + (a.action === 'delete' ? 'Deleted' : 'Corrected') + ' a ' + esc((EDIT_SPEC[a.table]||{title:a.table}).title.toLowerCase()) + '</b> · ' + esc(a.reason) +
+    ' · <span class="pill ' + auditState(a)[1] + '">' + auditState(a)[0] + '</span>', a.by));
+  return E;
+}
+function renderDays(){
+  if(!$('dayList')) return;
+  renderFounding();
+  const E = allEvents();
+  const months = [...new Set(E.map(e => e.date.slice(0,7)).concat([today().slice(0,7)]))].filter(m => m <= today().slice(0,7)).sort().reverse();
+  const sel = $('dayMonth'), keep = sel.value;
+  sel.innerHTML = months.map(m => '<option value="' + m + '">' + monthName(m) + '</option>').join('');
+  sel.value = months.indexOf(keep) >= 0 ? keep : months[0];
+  const one = $('dayDate').value, ym = sel.value;
+  const q = ($('dayQ').value || '').trim().toLowerCase();
+  const list = E.filter(e => (one ? e.date === one : e.date.slice(0,7) === ym) && (DAY_F === 'all' || e.type === DAY_F) &&
+    (!q || (e.text + ' ' + e.by).toLowerCase().replace(/<[^>]+>/g,'').indexOf(q) >= 0));
+  const byDay = {}; list.forEach(e => (byDay[e.date] = byDay[e.date] || []).push(e));
+  const dayKeys = Object.keys(byDay).sort().reverse();
+  $('dayPill').textContent = list.length + ' entr' + (list.length===1?'y':'ies');
+  const order = { farm:0, sale:1, money:2, buy:3, check:4, audit:5 };
+  const paperNote = (!one && ym <= '2026-09') || (one && one <= '2026-09-19')
+    ? '<div class="alert gold"><span class="ic">📄</span><div><b>Before the app, the farm kept paper records.</b> August sales are in the app line by line. ' +
+      'For 1–19 September only the weekly totals were on file, so sales are entered as period summaries (1–12 Sep and 13–19 Sep) and ' +
+      'daily egg counts are held as the opening total. Type the individual September sales and days in from the paper register and ' +
+      'correct or delete the summaries with ✎ Fix.</div></div>' : '';
+  $('dayList').innerHTML = paperNote + (dayKeys.length ? dayKeys.map(d => {
+    const ev = byDay[d].sort((a,b) => order[a.type] - order[b.type]);
+    const sales = ev.filter(e => e.type === 'sale'), sr = sales.reduce((a,e)=>a+num(e.rec&&e.rec.amount),0), se = sales.reduce((a,e)=>a+num(e.rec&&e.rec.eggs),0);
+    return '<div class="card"><h2>' + new Date(d + 'T00:00:00').toLocaleDateString('en-ZA',{weekday:'short', day:'numeric', month:'long', year:'numeric'}) +
+      ' <span class="pill">' + ev.length + '</span></h2>' +
+      (sales.length ? '<p class="muted" style="margin:-4px 0 6px">Sales this day: ' + sales.length + ' · ' + se + ' eggs · <b>' + R2(sr) + '</b></p>' : '') +
+      ev.map(e => '<div class="rec"><span class="d" style="width:26px;font-size:16px">' + e.icon + '</span><span class="m">' + e.text +
+        (e.by ? '<br><span class="muted">' + esc(e.by) + '</span>' : '') + '</span>' + (e.table && e.rec ? edBtn(e.table, e.rec) : '') + '</div>').join('') + '</div>';
+  }).join('') : '<div class="card"><p class="muted">Nothing recorded ' + (one ? 'on ' + fmtD(one) : 'in ' + monthName(ym)) + (DAY_F !== 'all' || q ? ' that matches' : '') + '.</p></div>');
+
+  /* since day one */
+  const cap = S.expenses.filter(x => x.kind === 'capital').reduce((a,x)=>a+num(x.amount)+num(x.vat),0);
+  const run = S.expenses.filter(x => x.kind !== 'capital').reduce((a,x)=>a+num(x.amount)+num(x.vat),0);
+  const sold = S.sales.reduce((a,x)=>a+num(x.eggs),0), rand = S.sales.reduce((a,x)=>a+num(x.amount),0);
+  const named = new Set(S.sales.map(x => String(x.customer).toLowerCase()).filter(n => !/walk/.test(n))).size;
+  const first = E.map(e => e.date).sort()[0];
+  const L = (k, v) => '<div class="line"><span>' + k + '</span><b>' + v + '</b></div>';
+  $('sinceBox').innerHTML = L('First entry', first ? fmtD(first) + ' ' + first.slice(0,4) : '—') +
+    L('Birds bought', batches().reduce((a,b)=>a+num(b.count),0) + ' in ' + batches().length + ' batches') +
+    L('Eggs collected (paper + app)', (stN('open_eggs') + S.records.reduce((a,r)=>a+num(r.eggs),0)).toLocaleString()) +
+    L('Eggs sold', sold.toLocaleString()) + L('Sales', R2(rand)) +
+    L('Named customers', named) + L('Capital spent (incl VAT)', R2(cap)) + L('Running costs (incl VAT)', R2(run)) +
+    L('Suppliers used', supState().cur.filter(x => x.status === 'used').length) +
+    L('Corrections on the audit trail', S.audit.filter(a => a.action !== 'review').length);
+}
+function renderFounding(){
+  const box = $('foundBox'); if(!box) return;
+  const done = st('founding_import');
+  if(done){ box.innerHTML = can('admin') ? '<p class="muted" style="margin:0 0 8px">Day-one records loaded ' + esc(String(done)) +
+      '. <a href="#" onclick="loadFounding();return false">Check for anything missing</a></p>' : ''; return; }
+  box.innerHTML = '<div class="card" style="border:2px solid var(--gold)"><h2>📥 The records from day one are not loaded yet</h2>' +
+    '<p style="font-size:14px;line-height:1.55;margin:0 0 10px">This puts everything from paper into the app: the Batch 1 build, invoices 157 and 158, ' +
+    'August water, the August sales register line by line, September sales (as the totals on file), September payroll, the day-one buying list ' +
+    'and the supplier book, and the accountant\'s open queries. Running it twice adds nothing twice.</p>' +
+    (can('admin') ? '<button class="btn" onclick="loadFounding()">Load everything from day one</button>'
+                  : '<p class="muted">The CEO or a manager loads these with one tap on this screen.</p>') + '</div>';
+}
+async function loadFounding(){
+  if(!can('admin')) return toast('Only the CEO or a manager can do this');
+  if(!confirm('Load the paper records from day one into the company book?')) return;
+  try{
+    toast('Loading…');
+    const j = await api('importfounding', {});
+    alert(j.message || 'Done');
+    await syncNow(true);
+  }catch(e){ toast(e.message); }
+}
+document.querySelectorAll('#dayFilter button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#dayFilter button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); DAY_F = b.dataset.f; renderDays();
+});
 /* ---------- team ---------- */
 async function loadTeam(quiet){
   if(!isAdmin()) return;
@@ -3623,7 +3872,7 @@ function applyRole(){
 }
 function renderAll(){
   const parts = [renderHome, renderLists, renderMoney, renderBooks, renderSetup, renderTasks,
-                 renderVisitors, renderBuyQuiet, renderAudit, renderKPIs, applyRole, decorateTips];
+                 renderVisitors, renderBuyQuiet, renderAudit, renderKPIs, renderDays, applyRole, decorateTips];
   parts.forEach(fn => { try{ fn(); }catch(e){ console.error(fn.name, e); } });
 }
 
