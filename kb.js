@@ -94,6 +94,22 @@ window.KB = [
   box('note','Dates come from the company files. Where a file gives no exact date, it says "about". Correct anything here by telling the CEO — the history is only useful if it is right.'),
   related:['finance-policy','buying-rules','records'], src:[HIST, FARM] },
 
+{ id:'corrections', cat:'company', title:'Correcting a mistake — and the audit trail',
+  summary:'Anyone who records can fix or delete an entry, with a reason. The old version is kept for ever, and someone else reviews it.',
+  tags:'edit correct delete mistake audit trail error query review',
+  body:
+  '<p>Mistakes happen — 45 written as 54, a sale on the wrong day, an entry made twice. The rule is not "never make a mistake"; it is <b>never hide one</b>.</p>' +
+  '<h3>How it works</h3>' +
+  ol(['Tap <b>✎ Fix</b> beside the entry.','Change what is wrong — or delete it — and choose the reason.',
+      'The corrected version becomes the record. Every total, the customer book and the books update.',
+      'The entry as it was goes into <b>Books → Audit trail</b>, untouched, with the reason, your name and the time.',
+      'The accountant, CEO or a manager <b>accepts it as a genuine error</b> or <b>queries it</b>. Nobody reviews their own correction.']) +
+  '<h3>Who can correct what</h3>' +
+  ul(['Operations: the daily count, and their own sales, weights, health, feed, water and visitor entries.',
+      'CEO and managers: everything, including the ledger.','Accountant and Auditor: nothing — they review.']) +
+  box('law','Correcting an entry in a month that is already signed off is allowed, but the correction is flagged "after the month was signed off", so the accountant sees it.') +
+  box('note','Saving a day that is already recorded opens the correction form instead of silently overwriting it.'),
+  related:['records','finance-policy'], src:[FPOL] },
 { id:'finance-policy', cat:'company', title:'Finance Policy — how money is handled',
   summary:'Who may spend what, where profit goes first, how cash is kept, and the pricing and credit rules.',
   tags:'finance policy approval spending matrix funds order cash banking petty cash credit price floor rules constitution',
@@ -601,6 +617,74 @@ window.KB = [
       'Unsold stock on Home is cash with a deadline. Sell it before it ages.']),
   related:['egg-grades','selling','egg-quality'], src:[R345, MERCK, OPS] },
 
+{ id:'key-numbers', cat:'money', title:'The key numbers every layer farm watches',
+  summary:'Lay rate, feed per dozen, feed cost per egg, broken eggs and deaths — what each tells you.',
+  tags:'kpi numbers feed conversion feed per dozen mortality broken cost per egg',
+  body:
+  tbl(['Number','What it tells you','Watch for'], [
+    ['Lay rate','Eggs ÷ hens present','Below the Hy-Line line for the batch age'],
+    ['Feed per dozen eggs','Kilograms of feed for 12 eggs','A rise with no change in weather: waste, rats, or falling lay'],
+    ['Feed cost per egg','What the feed in one egg costs','Close to the selling price means no margin for wages'],
+    ['Broken and dirty %','Eggs that cannot be sold','Rising: trays, collection times, cage floor, thin shells'],
+    ['Deaths since placement','Birds lost ÷ birds placed','Hy-Line expects about 5% over the whole lay to 80 weeks; more than 2–3 birds a week, call the vet'],
+    ['Water per bird','Litres ÷ birds','A sudden drop is often the first sign of disease']
+  ]) +
+  '<p>All of them are on the Home screen. They are only as good as the daily record — a blank feed box uses the normal ration, so record what was really fed.</p>',
+  related:['lay-cycle','feed','money'], src:[HY] },
+
+{ id:'emergencies', cat:'house', title:'Emergencies — power, water, feed, heat, theft, fire',
+  summary:'What to do when things go wrong, and what to have ready before they do.',
+  tags:'emergency load-shedding power cut water outage feed runs out theft fire insurance',
+  body:
+  tbl(['If','Do this'], [
+    ['Power cut / load-shedding','Birds are fine for hours — the risks are the timer losing its time (lights at the wrong hours) and pumps stopping. Reset the timer after every cut. For long cuts, a battery lamp keeps the 16-hour day.'],
+    ['No water','Backup drums first — never let birds go a day without water. Lay stops within a day. Then a water delivery.'],
+    ['Feed running out','Never switch to maize or bread — buy one or two bags of layer feed from anyone who has it. Order at 5 days left so this never happens.'],
+    ['Heat wave','See Heat stress: water every hour, curtains open, no handling.'],
+    ['Sudden deaths','Stop all movement and call the state vet — see Notifiable diseases.'],
+    ['Theft','Lock the house and feed store; a security light; count birds weekly; report to the police and keep the case number for insurance.'],
+    ['Fire','Extinguisher at the electrical point, serviced yearly. Never store fuel or feed against the wiring.']
+  ]) +
+  '<h3>Worth having</h3>' +
+  ul(['Insurance on the structure, equipment and birds once the flock is worth more than you could replace from cash.',
+      'Emergency numbers saved in every phone (Knowledge → Emergency numbers).',
+      'Two people who know how to do every daily job.']),
+  related:['water','heat-stress','notifiable','emergency'], src:[HYMG, MERCK] },
+
+{ id:'equipment-care', cat:'house', title:'Equipment — what lasts, what wears out',
+  summary:'How long common layer-house equipment lasts and how often to service it.',
+  tags:'equipment lifespan replace repair maintain service bulbs curtains drinkers cages',
+  body:
+  '<p>Tasks → Equipment keeps the register with due dates. These are typical figures — change any interval in the app to match what you see on the farm.</p>' +
+  tbl(['Item','Typical life','Care'], [
+    ['Layer cages (galvanised)','10–15 years','Yearly inspection for rust and broken wire'],
+    ['LED bulbs','15,000–25,000 hours (3–4 years at 16 h a day)','Replace failures the same day'],
+    ['Drinker cups / nipples','2–3 years','Scrub weekly; replace leakers'],
+    ['Curtains / screening','2–3 years in sun','Replace when brittle'],
+    ['Manure tarpaulin','6–12 months','Replace when torn'],
+    ['Plastic storage tank','15 years or more','Clean every 6 months'],
+    ['Timer plug','2–3 years','Reset after every power cut'],
+    ['Gumboots and overalls','About a year','Replace cracked boots'],
+    ['Fire extinguisher','Long, with service','Serviced every 12 months']
+  ]) +
+  box('note','Lifespans are general estimates for small farms, not manufacturer figures. Record replacements in the app and after a year you will have your own.'),
+  related:['housing','lighting','water','emergencies'], src:[HYMG] },
+
+{ id:'egg-safety', cat:'eggs', title:'Egg food safety',
+  summary:'Eggs are food. Clean, uncracked, cool, dated and traceable — and never from birds under treatment.',
+  tags:'food safety salmonella hygiene traceability lay date complaint recall',
+  body:
+  ul(['<b>Cracked and dirty eggs never go to customers.</b> Bacteria enter through cracks.',
+      '<b>Do not wash eggs in a bucket</b> — dry-clean light marks.',
+      '<b>Cool and steady</b> storage, out of the sun, away from chemicals and fuel.',
+      '<b>Date every tray</b> with the lay date and sell oldest first.',
+      '<b>No eggs from birds in a withdrawal period</b> — the app blocks sales until the date passes.',
+      '<b>Clean hands, clean trays.</b> Used trays from other farms and shops stay out of the house.',
+      '<b>Rats and wild birds out</b> — they carry salmonella.']) +
+  '<h3>If a customer complains</h3>' +
+  ol(['Take their name, number and the date they bought.','Find the sale in the app — the lay date on the tray tells you which day.',
+      'Check that day\'s record, health log and any treatments.','Replace or refund, and write down what happened.']),
+  related:['egg-handling','egg-grades','withdrawal','labelling'], src:[R345, MERCK] },
 { id:'egg-grades', cat:'eggs', title:'Egg sizes and grades (South Africa)',
   summary:'The legal size bands, the three grades, and why cracked eggs cannot be sold.',
   tags:'grade size jumbo large medium small cracked dirty regulations R345',
@@ -667,6 +751,8 @@ window.KB = [
     ['Visitor register (Form 9)','Record → Visitors'],
     ['Daily, weekly and monthly checklists','Tasks'],
     ['Buying list, quotes and supplier contacts','Buying (under More on a phone)'],
+    ['Build checklist and equipment register','Tasks → Build, Tasks → Equipment'],
+    ['Corrections and deletions','Books → Audit trail'],
     ['Finance Policy, bridge loan, company history','Knowledge → Our company']
   ]) +
   '<h3>The habits</h3>' +
@@ -832,6 +918,18 @@ window.KB = [
    go: "view" or "view:subtab" for the "Take me there" button.
    ===================================================================== */
 window.HELP = [
+{ id:'fix', icon:'✎', title:'Fixing or deleting an entry', tags:'edit correct delete mistake wrong fix change',
+  body:'<p>Tap <b>✎ Fix</b> beside any entry — daily records, sales, weights, health, feed, water, visitors, or the ledger (CEO and managers). ' +
+  'Change it or delete it, and give the reason. The old version is kept in <b>Books → Audit trail</b>, and the accountant or CEO accepts or queries it.</p>' +
+  '<p>Operations can fix the daily count and their own entries. If the Fix button is missing, ask a manager.</p>', go:'rec:today' },
+{ id:'audit', icon:'🔍', title:'Reviewing corrections', tags:'audit review accept query correction', roles:['ceo','manager','acct'],
+  body:'<p><b>Books → Audit trail</b> lists every correction with the before and after. Tap <b>Accept as an error</b> or <b>Query it</b> with a question. You cannot review your own corrections.</p>', go:'money:audit' },
+{ id:'build', icon:'🏗️', title:'The build checklist', tags:'build setup new site land construction checklist',
+  body:'<p><b>Tasks → Build</b> goes from planning to the birds arriving: paperwork, structure, cages and equipment, biosecurity, people, and buying the birds. ' +
+  'Each site has its own list — the CEO or a manager adds a new site for new land.</p>', go:'tasks' },
+{ id:'equip', icon:'🔧', title:'The equipment register', tags:'equipment replace repair service lifespan due',
+  body:'<p><b>Tasks → Equipment</b> shows what to replace on a schedule, what to service, and what was bought once — how long each lasts and when it is next due. ' +
+  'Tap <b>Done today</b> or <b>Replaced today</b>; for a replacement, <b>Add to buying list</b> puts it straight on the list.</p>', go:'tasks' },
 { id:'buying', icon:'🛒', title:'The buying list', tags:'buy buying list purchase quote supplier bought need',
   body:'<p><b>Buying</b> holds the day-one paper list and everything added since. Tap an item to update it: mark it <b>Have it</b> with the price and supplier, or record a quote. ' +
   'Every change keeps the old line, so the history shows who changed what and when. The blue pill says who must approve the spend under the Finance Policy.</p>' +

@@ -12,8 +12,8 @@
    cached page is served immediately.
    --------------------------------------------------------------- */
 
-const CACHE = 'zondi-v2-1';
-const SHELL = ['./', './index.html', './manifest.webmanifest',
+const CACHE = 'zondi-v3-3';
+const SHELL = ['./', './index.html', './kb.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -52,6 +52,19 @@ self.addEventListener('fetch', e => {
           return res;
         })
         .catch(() => caches.match('./index.html').then(hit => hit || caches.match('./')))
+    );
+    return;
+  }
+
+  /* the knowledge library: network first too, so new articles arrive with the deploy */
+  if (url.origin === location.origin && url.pathname.endsWith('/kb.js')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./kb.js', copy)); }
+          return res;
+        })
+        .catch(() => caches.match('./kb.js'))
     );
     return;
   }

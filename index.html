@@ -53,6 +53,7 @@ main{padding:12px 12px 6px;max-width:680px;margin:0 auto}
 .view{display:none}.view.on{display:block;animation:fade .18s ease}
 .rsec{display:none}.rsec.on{display:block;animation:fade .18s ease}
 .bsec{display:none}.bsec.on{display:block;animation:fade .18s ease}
+.tsec{display:none}.tsec.on{display:block;animation:fade .18s ease}
 tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
@@ -130,6 +131,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#f
   background:var(--card);font-size:13px;font-weight:640;color:var(--ink-2);cursor:pointer}
 .segs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .usec{display:none}.usec.on{display:block}
+.modal{position:fixed;inset:0;z-index:130;background:rgba(31,23,11,.45);display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.modal-card{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;
+  padding:14px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+@media (min-width:700px){ .modal{align-items:center} .modal-card{border-radius:20px;max-height:86vh} }
+.modal-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.modal-head b{flex:1;font-size:17px}
+.modal-head .x{border:none;background:var(--bg);width:34px;height:34px;border-radius:99px;font-size:15px;cursor:pointer}
+.edb{border:1.5px solid var(--line);background:var(--card);border-radius:9px;padding:4px 9px;font-size:12px;font-weight:650;
+  color:var(--ink-2);cursor:pointer;flex:none;margin-left:auto}
+.edb:hover{border-color:var(--accent);color:var(--accent)}
+.diff{font-size:12.5px;line-height:1.5;margin:6px 0}
+.diff s{color:var(--red)}.diff ins{color:var(--accent);text-decoration:none;font-weight:650}
+.aud{border-bottom:1px solid var(--line);padding:11px 0}.aud:last-child{border-bottom:none}
 .item{border-bottom:1px solid var(--line);padding:11px 0}
 .item:last-child{border-bottom:none}
 .item .top{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
@@ -566,6 +581,11 @@ nav#bottom .badge{top:3px}
   </div>
 
   <div class="card">
+    <h2 data-tip="kpi">Key numbers — last 7 days</h2>
+    <div class="lines" id="kpiBox"></div>
+  </div>
+
+  <div class="card">
     <h2 data-tip="feedtank">Feed tank <span class="pill" id="feedPill">—</span></h2>
     <div class="gauge">
       <div class="ring2">
@@ -781,6 +801,7 @@ nav#bottom .badge{top:3px}
     <button data-b="price">💰 Price</button>
     <button data-b="ledger">🧾 Ledger</button>
     <button data-b="recon">✅ Reconcile</button>
+    <button data-b="audit">🔍 Audit trail<span class="badge sb-audit" style="display:none;position:static;margin-left:6px"></span></button>
   </div>
 
   <!-- ---- P&L ---- -->
@@ -906,6 +927,21 @@ nav#bottom .badge{top:3px}
   </div>
 
   <!-- ---- reconcile ---- -->
+  <div class="bsec" id="b-audit">
+    <div class="card">
+      <h2 data-tip="audit">Audit trail <span class="pill" id="audPill">—</span></h2>
+      <p class="muted" style="margin:-4px 0 10px">Every correction and deletion, with the record as it was, what it became,
+        why, and who did it. Nothing here can be changed or removed. The accountant, CEO or a manager accepts each one as
+        a genuine error or queries it — never their own.</p>
+      <div class="segs" id="audFilter">
+        <button class="on" data-f="open">Waiting for review</button>
+        <button data-f="queried">Queried</button>
+        <button data-f="all">Everything</button>
+      </div>
+    </div>
+    <div id="audList"></div>
+  </div>
+
   <div class="bsec" id="b-recon">
     <div class="card">
       <h2 data-tip="recon">Reconcile a month</h2>
@@ -953,7 +989,11 @@ nav#bottom .badge{top:3px}
     <button data-t="monthly">🗓️ This month</button>
     <button data-t="health">💉 Health</button>
     <button data-t="batch">🐔 Batch</button>
+    <button data-t="build">🏗️ Build</button>
+    <button data-t="equip">🔧 Equipment</button>
   </div>
+  <div class="tsec" id="t-build"></div>
+  <div class="tsec" id="t-equip"></div>
   <div class="tsec on" id="t-daily"></div>
   <div class="tsec" id="t-weekly"></div>
   <div class="tsec" id="t-monthly"></div>
@@ -1238,6 +1278,13 @@ nav#bottom .badge{top:3px}
   <button class="btn sm" onclick="hideTip()">Got it</button></div>
 </div>
 
+<div id="editor" class="modal" onclick="if(event.target===this)closeEditor()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head"><b id="edTitle">Correct an entry</b><button class="x" onclick="closeEditor()" aria-label="Close">✕</button></div>
+    <div id="edBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="kb.js"></script>
@@ -1247,7 +1294,7 @@ nav#bottom .badge{top:3px}
    Owner: paste the Apps Script /exec link below, save, upload.
    ========================================================== */
 const FARM_URL = "https://script.google.com/macros/s/AKfycbzlbNrQGhDzznik74aCiFhxYZzTwHXK8xGJBaBMwItPAMzn-QlJRwAK66lzBWTG40xw/exec";
-const APP_VERSION = '3.2';
+const APP_VERSION = '3.3';
 
 const COUNTRIES = [
   ['ZA','🇿🇦','27','South Africa'], ['GB','🇬🇧','44','United Kingdom'], ['ZW','🇿🇼','263','Zimbabwe'],
@@ -1297,9 +1344,9 @@ const DEF = {
     nd_interval:60, deworm_interval:75, mite_interval:30, weigh_interval:30
   },
   records:[], sales:[], weights:[], health:[], feed:[], water:[], customers:[],
-  expenses:[], recon:[], checks:[], visitors:[], purchases:[], suppliers:[],
+  expenses:[], recon:[], checks:[], visitors:[], purchases:[], suppliers:[], audit:[],
   q:{ records:[], sales:[], weights:[], health:[], feed:[], water:[], expenses:[], recon:[], checks:[], visitors:[],
-      purchases:[], suppliers:[] },
+      purchases:[], suppliers:[], edits:[], reviews:[] },
   settingsDirty:false, lastSync:0, pending:0
 };
 
@@ -1676,6 +1723,11 @@ function normalise(j){
                   category:String(x.category||''), location:String(x.location||''), contact:String(x.contact||''),
                   best_for:String(x.best_for||''), status:x.status||'option', why:String(x.why||''),
                   by:x.by||'', ts:num(x.ts) }));
+  const pj = v => { if(!v) return null; if(typeof v === 'object') return v; try{ return JSON.parse(v); }catch(e){ return null; } };
+  S.audit = (j.audit||[]).map(a => ({ id:String(a.id), table:String(a.table||''), record_id:String(a.record_id||''),
+                  action:String(a.action||''), before:pj(a.before), after:pj(a.after), reason:String(a.reason||''),
+                  after_signoff:String(a.after_signoff||''), status:String(a.status||''), by:String(a.by||''),
+                  by_id:String(a.by_id||''), ts:num(a.ts) }));
   if(j.settings) S.settings = { ...S.settings, ...j.settings };
 }
 
@@ -1701,7 +1753,9 @@ async function syncNow(quiet){
       const sent = body[k] || [];
       S.q[k] = S.q[k].filter(x => sent.indexOf(x) < 0);
       S.q[k].forEach(x => {
-        if(k === 'records'){ S.records = S.records.filter(r => r.date !== x.date); S.records.push(x); }
+        if(k === 'edits') applyEditLocal(x);
+        else if(k === 'reviews'){ if(!S.audit.some(a => a.id === x.rid)) S.audit.push({ id:x.rid, table:'', record_id:x.aid, action:'review', reason:x.note, status:x.status, by:x.by, by_id:'', ts:x.ts }); }
+        else if(k === 'records'){ S.records = S.records.filter(r => r.date !== x.date); S.records.push(x); }
         else if(!S[k].some(y => (y.rid || y.id) === (x.rid || x.id))) S[k].push(x);
       });
     });
@@ -1724,7 +1778,7 @@ function queue(kind, item){
   if(kind==='records'){
     S.records = S.records.filter(r => r.date !== item.date);
     S.records.push(item);
-  } else S[kind].push(item);
+  } else if(Array.isArray(S[kind])) S[kind].push(item);
   save(); renderAll(); syncNow(true);
 }
 
@@ -1736,6 +1790,13 @@ function saveToday(){
   const eggs = num($('tEggs').value);
   if(c.birds && eggs > c.birds*1.2)
     return toast(eggs + ' eggs from ' + c.birds + ' birds is not possible — please check.');
+  const already = S.records.find(r => r.date === date);
+  if(already && !S.q.records.some(r => r.date === date)){
+    openEditor('records', date, { eggs, broken:num($('tBroken').value),
+      feed: $('tFeed').value==='' ? '' : num($('tFeed').value), water: $('tWater').value==='' ? '' : num($('tWater').value),
+      note: $('tNote').value.trim() || already.note });
+    return toast(fmtD(date) + ' is already recorded — say why it is changing');
+  }
   queue('records', { date, eggs, broken:num($('tBroken').value),
     feed: $('tFeed').value==='' ? '' : num($('tFeed').value),
     water: $('tWater').value==='' ? '' : num($('tWater').value),
@@ -1999,14 +2060,14 @@ function renderLists(){
     '</b> eggs' + (num(r.broken)?' · '+num(r.broken)+' broken':'') +
     (r.feed!==''&&r.feed!=null?' · '+num(r.feed)+' kg feed':'') +
     (r.water!==''&&r.water!=null?' · '+num(r.water)+' L':'') +
-    (r.note?' · '+esc(r.note):'') + (r.by?' · '+esc(r.by):'') + '</span></div>').join('')
+    (r.note?' · '+esc(r.note):'') + (r.by?' · '+esc(r.by):'') + '</span>' + edBtn('records', r) + '</div>').join('')
     || '<p class="muted">Nothing yet.</p>';
 
   const sales = [...S.sales].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,20);
   $('listSales').innerHTML = sales.map(s =>
     '<div class="rec"><span class="d">' + fmtD(s.date) + '</span><span class="m"><b>' + esc(s.customer) +
     '</b> · ' + num(s.eggs) + ' eggs · ' + R2(num(s.amount)) +
-    ' <span class="muted">(' + R2(num(s.amount)/Math.max(1,num(s.eggs))) + '/egg)</span></span></div>').join('')
+    ' <span class="muted">(' + R2(num(s.amount)/Math.max(1,num(s.eggs))) + '/egg)</span></span>' + edBtn('sales', s) + '</div>').join('')
     || '<p class="muted">No sales recorded yet.</p>';
 
   const cust = [...S.customers].sort((a,b)=>b.rand-a.rand);
@@ -2022,26 +2083,26 @@ function renderLists(){
     '<div class="rec"><span class="d">' + esc(w.tag) + '</span><span class="m">' + w.kg.toFixed(2) +
     ' kg · ' + esc(w.batch) + ' · <span class="pill ' +
     (w.verdict==='OK'?'g':w.verdict==='UNDER'?'r':'y') + '">' + esc(w.verdict) + '</span>' +
-    ' <span class="muted">' + fmtD(w.date) + '</span></span></div>').join('')
+    ' <span class="muted">' + fmtD(w.date) + '</span></span>' + edBtn('weights', w) + '</div>').join('')
     || '<p class="muted">No weights recorded yet.</p>';
 
   const hl = [...S.health].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,20);
   $('listHealth').innerHTML = hl.map(h =>
     '<div class="rec"><span class="d">' + fmtD(h.date) + '</span><span class="m"><b>' + esc(h.kind) +
     '</b>' + (num(h.birds)?' · '+num(h.birds)+' birds':'') + (h.treatment?' · '+esc(h.treatment):'') +
-    (h.safe_from?' · <span class="pill r">no sales to '+fmtD(h.safe_from)+'</span>':'') + '</span></div>').join('')
+    (h.safe_from?' · <span class="pill r">no sales to '+fmtD(h.safe_from)+'</span>':'') + '</span>' + edBtn('health', h) + '</div>').join('')
     || '<p class="muted">No health records — good.</p>';
 
   const fd = [...S.feed].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,20);
   $('listFeed').innerHTML = fd.map(f =>
     '<div class="rec"><span class="d">' + fmtD(f.date) + '</span><span class="m"><b>' + num(f.bags) +
     ' bags</b> · ' + num(f.bags)*c.bagKg + ' kg · ' + R(num(f.bags)*num(f.price)) +
-    (f.sup?' · '+esc(f.sup):'') + '</span></div>').join('') || '<p class="muted">Nothing logged.</p>';
+    (f.sup?' · '+esc(f.sup):'') + '</span>' + edBtn('feed', f) + '</div>').join('') || '<p class="muted">Nothing logged.</p>';
 
   const wa = [...S.water].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,20);
   $('listWater').innerHTML = wa.map(w =>
     '<div class="rec"><span class="d">' + fmtD(w.date) + '</span><span class="m"><b>' + num(w.litres) +
-    ' L</b> · ' + esc(w.source) + (num(w.cost)?' · '+R(num(w.cost)):'') + '</span></div>').join('')
+    ' L</b> · ' + esc(w.source) + (num(w.cost)?' · '+R(num(w.cost)):'') + '</span>' + edBtn('water', w) + '</div>').join('')
     || '<p class="muted">Nothing logged.</p>';
 }
 
@@ -2200,7 +2261,7 @@ function renderBooks(){
     (CAT_ICON[x.category]||'•') + ' <b>' + R2(x.amount) + '</b> · ' + esc(x.description || x.category) +
     (x.supplier ? ' · ' + esc(x.supplier) : '') + (x.invoice ? ' · inv ' + esc(x.invoice) : '') +
     (x.kind === 'capital' ? ' <span class="pill b">capital</span>' : '') +
-    '</span></div>').join('') : '<p class="muted">Nothing in the ledger yet.</p>';
+    '</span>' + edBtn('expenses', x) + '</div>').join('') : '<p class="muted">Nothing in the ledger yet.</p>';
 
   /* ---- reconcile ---- */
   const sel = $('rcMonth');
@@ -2297,7 +2358,7 @@ function dailyItems(c){
     ['eggs-1','09:30','Egg collection 1','Point-end down in the trays. Cracked and dirty eggs go aside — they may not be sold.','egg-handling'],
     ['eggs-2','12:30','Egg collection 2 + water check','In hot weather refill drinkers — hens can drink double in the heat.','heat-stress'],
     ['feed-pm','14:00','Afternoon feed','The second half — about ' + half + ' kg. Sweep up spilled feed; it feeds rats.','feed'],
-    ['eggs-3','16:30','Egg collection 3','Final collection. Grade, count, and record the day\'s total.','egg-handling'],
+    ['eggs-3','16:30','Egg collection 3','Final collection. Grade, count, write the lay date on the trays, and record the day\'s total.','egg-handling'],
     ['walk-pm','17:00','Evening walk-through','Did every bird eat? Hunched, pale or isolated birds go to the sick cage now — not tomorrow.','healthy-sick'],
     ['lockup','17:30','Lock-up','Doors and curtains secure. Footbath topped up for the morning.','biosecurity'],
     ['record','—','Record today in the app','Eggs, broken, feed, water, any deaths. If it is not written down, it did not happen.','records']
@@ -2320,6 +2381,7 @@ const MONTHLY = [
   ['feedaudit','Feed audit','Bags used against eggs produced. Feed rising while eggs stay flat means waste, rats or disease.','feed'],
   ['parasites','Parasite check','Under the wings and around the vent. Red mite hides in cage joints by day — check at night with a torch.','parasites'],
   ['finance','Finance report and partners\' meeting','Monthly report by the 5th, partners\' meeting by the 10th: profit, fund balances (feed reserve first), upcoming spend. Is payroll in the ledger? Decisions recorded in writing.','finance-policy','money:pl'],
+  ['eggsize','Egg size check','Weigh 30 eggs from the day\'s collection. Compare the average with the Hy-Line egg-weight curve — small eggs at 30+ weeks point to feed, water or heat.','egg-grades'],
   ['recon','Reconcile last month','The accountant signs last month off under Books → Reconcile.','records','money:recon']
 ];
 const HEALTH = [
@@ -2482,7 +2544,7 @@ function renderTasks(){
     '<li>Every medicine goes in Record → Health with its withdrawal days. No eggs are sold until it passes.</li>' +
     '<li>More than 2–3 birds sick or dying in a week: call the vet. Sudden deaths with swollen heads or twisted necks: ' +
     '<b>stop all movement and call the state vet</b> — <a href="#" onclick="openKB(\'notifiable\');return false">what to do</a>.</li></ul></div>';
-  document.querySelectorAll('.sb-tasks').forEach(el => { el.style.display = late ? 'grid' : 'none'; el.textContent = late; });
+  document.querySelectorAll('.sb-tasks').forEach(el => { el.dataset.health = late; el.style.display = late ? 'grid' : 'none'; el.textContent = late; });
 
   /* batches */
   $('t-batch').innerHTML = ro + c.perBatch.map(b => {
@@ -2495,6 +2557,7 @@ function renderTasks(){
     return listCard('🐔 ' + esc(b.name) + ' — arrival', num(b.count) + ' birds · ' + state, ar, an, ARRIVAL.length) +
       listCard(esc(b.name) + ' — end of lay clean-out', 'When this batch leaves, before the next one comes in.', cr, cn, CLEANOUT.length);
   }).join('') || '<div class="card"><p class="muted">No batches set up yet — add one in Setup.</p></div>';
+  renderBuildEquip();
 }
 document.querySelectorAll('#taskTabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#taskTabs button').forEach(x => x.classList.remove('on'));
@@ -2503,6 +2566,185 @@ document.querySelectorAll('#taskTabs button').forEach(b => b.onclick = () => {
   $('t-' + b.dataset.t).classList.add('on');
   window.scrollTo({ top:0, behavior:'smooth' });
 });
+
+/* =====================================================================
+   BUILD CHECKLIST — from bare ground to birds in the cages, per site
+   EQUIPMENT REGISTER — what must be serviced, replaced or just checked
+   once a year, how long each thing lasts, and when it is next due
+   ===================================================================== */
+const BUILD = [
+  ['Plan & paperwork', [
+    ['plan-budget','Budget and funding approved in writing','Over R10,000 or any loan: all partners and the investor, signed (Finance Policy).','finance-policy'],
+    ['plan-market','Buyers lined up before birds are bought','Standing orders for the extra eggs every day — finding buyers is harder than finding birds.','selling'],
+    ['plan-zoning','Land use and building plans checked','Poultry allowed on the land; building plans with the municipality; ask about environmental and water-use permits.','new-land'],
+    ['plan-water','Water source confirmed and tested','Borehole yield and water-quality test, or a municipal connection. Water rules land in or out.','new-land'],
+    ['plan-power','Electricity for lights and a fan','16 hours of light is not possible without it.','lighting'],
+    ['plan-law','Egg selling rules and SAPA registration checked','Pack marking, cracked eggs, the 2026 SAPA registration.','labelling']]],
+  ['Site & structure', [
+    ['site-clear','Site cleared, drainage checked after rain','A feed truck must reach the door in the rain.','new-land'],
+    ['site-house','House built — roof, low brick wall, mesh sides, lockable door','Narrow, open-sided houses ventilate best in our climate.','housing'],
+    ['site-shade','Curtains or screening fitted; long walls shaded','Keeps out wind in winter and sun in summer.','heat-stress'],
+    ['site-floor','Floor cleanable; tarpaulin or trays under the cages','Manure must be easy to scrape out three times a week.','manure'],
+    ['site-fence','Fence and gate — people and dogs kept out','Biosecurity starts at the gate.','biosecurity'],
+    ['site-security','Locks, a security light, a theft plan','Stock and equipment theft is common — birds, feed and cables.','emergencies']]],
+  ['Cages & equipment', [
+    ['eq-cages','Cages installed level and secure','New cages: at least 550 cm² per hen (SAPA Code of Practice).','housing'],
+    ['eq-troughs','Feed troughs level, 7–9 cm per bird','','feed'],
+    ['eq-water','Header tanks, lines and drinkers fitted — every drinker tested','About 1 nipple per 12 birds, or 2 cups per cage section.','water'],
+    ['eq-tank','Storage tank on a stand, shaded; backup drums full','','water'],
+    ['eq-light','Lights and timer fitted, 16-hour programme set','Check the bottom tier gets light too.','lighting'],
+    ['eq-thermo','Min–max thermometer at bird height','','heat-stress'],
+    ['eq-scales','Feed scale and bird scale','','body-weight'],
+    ['eq-store','Feed store: pallets and rat-proof bins','','feed'],
+    ['eq-egg','Egg table, trays and a cool storage spot','','egg-handling'],
+    ['eq-fire','Fire extinguisher at the electrical point','','emergencies']]],
+  ['Health & biosecurity', [
+    ['bio-footbath','Footbath at the door, disinfectant ready','','biosecurity'],
+    ['bio-ppe','Overalls, gumboots and gloves kept at the house; spare set for visitors','','biosecurity'],
+    ['bio-kit','Health kit and a sick cage','Electrolytes, disinfectant, wound spray, gloves, an empty cage away from the flock.','healthy-sick'],
+    ['bio-vet','A vet chosen; vet and state vet numbers saved','','emergency'],
+    ['bio-rodent','Bait stations placed outside the house','','rodents'],
+    ['bio-dead','Dead-bird disposal pit or plan','','dead-birds']]],
+  ['People & records', [
+    ['ppl-roles','Everyone knows their job','Operations, Finance, Marketing — who records, who banks, who sells.','finance-policy'],
+    ['ppl-train','Staff shown the daily routine, biosecurity rules and the app','','biosecurity'],
+    ['ppl-app','The app on every phone, everyone signed in','','records'],
+    ['ppl-bank','Bank account, petty cash and receipt file set up','','finance-policy']]],
+  ['Buying the birds', [
+    ['buy-quotes','Pullet supplier chosen from two quotes','Vaccination record promised in writing. Hy-Line Brown, 18 weeks.','new-batch'],
+    ['buy-approve','Purchase approved under the Finance Policy','','finance-policy'],
+    ['buy-feed','Feed on site for 25 days at the NEW burn rate','','feed'],
+    ['buy-test','House run with water for 24 hours before arrival','Then the Batch tab takes over.','new-batch']]]
+];
+
+/* id, name, kind (replace | service | once), every (days), how long it lasts, what to do, kb */
+const EQUIP = [
+  ['bulbs','LED bulbs','replace',1095,'15,000–25,000 hours — about 3–4 years at 16 hours a day','Replace any failed bulb the same day; keep one spare.','lighting'],
+  ['curtains','Curtains / shade screening','replace',730,'About 2–3 years in full sun','Replace when torn or brittle — gaps let in wind and rain.','housing'],
+  ['tarp','Manure tarpaulin under the cages','replace',365,'About 6–12 months','Replace when torn; wet manure through a hole means ammonia.','manure'],
+  ['drinkers','Drinker cups / nipples','replace',730,'About 2–3 years','Replace any leaking or stuck drinker at once — leaks wet the manure.','water'],
+  ['boots','Gumboots','replace',365,'About a year','Replace when cracked — cracks hold dirt the footbath cannot reach.','biosecurity'],
+  ['overalls','Overalls','replace',365,'About a year','Washed weekly, never worn off the farm.','biosecurity'],
+  ['gloves','Rubber gloves','replace',30,'About a month','','biosecurity'],
+  ['buckets','Buckets, brushes and scraper','replace',365,'About a year','Paint-marked, poultry house only.','biosecurity'],
+  ['footbath','Footbath tray','replace',365,'About a year','Disinfectant refreshed daily (lock-up) and whenever dirty.','biosecurity'],
+  ['trays','Plastic egg trays','replace',730,'About 2 years','Wash after every use; throw out cracked trays.','egg-handling'],
+  ['timer','Timer plug','service',7,'About 2–3 years','Check the clock after every power cut — load-shedding resets it.','lighting'],
+  ['headtanks','Header tanks','service',30,'Many years','Empty, scrub, disinfect and refill.','water'],
+  ['troughs','Feed troughs','service',30,'5 years or more','Check level, cracks and joints; scrape out caked feed.','feed'],
+  ['fan','Circulation fan','service',30,'About 3–5 years','Clean dust off the blades and guard.','heat-stress'],
+  ['scales','Feed and bird scales','service',30,'Several years','Check with a known weight — a full 1-litre bottle of water is about 1 kg. New batteries when weak.','body-weight'],
+  ['drums','Backup water drums','service',30,'Several years','Empty, rinse and refill.','water'],
+  ['bins','Feed bins and pallets','service',30,'Several years','Dry, no holes, no old feed caked in the corners.','rodents'],
+  ['sickcage','Sick / isolation cage','service',30,'Many years','Clean and disinfect after every use.','healthy-sick'],
+  ['lines','Water pipes and hoses','service',90,'Hose in sun about 2–3 years','Check for leaks, algae and brittle hose.','water'],
+  ['structure','House roof, walls and mesh','service',90,'Many years','Roof leaks, mesh holes, doors and locks — fix the same week.','housing'],
+  ['jojo','Storage tank (JoJo)','service',180,'15 years or more','Drain, clean out the sediment, check the lid and stand.','water'],
+  ['thermo','Min–max thermometer','service',180,'Several years','New battery; check against a second thermometer.','heat-stress'],
+  ['extinguisher','Fire extinguisher','service',365,'Many years with servicing','Annual service by an accredited company; check the gauge monthly.','emergencies'],
+  ['cages','Layer cages','once',365,'10–15 years with care','Yearly inspection: rust, broken wire, doors, egg roll-out. Repair the same week.','housing'],
+  ['cooler','Cooler box and ice packs','once',365,'Many years','Check the seal and that ice packs are frozen before a vaccine trip.','vaccination']
+];
+const EQ_KIND = { replace:['Replace on a schedule','Replaced today'], service:['Clean, check and service','Done today'], once:['Bought once — inspect yearly','Inspected today'] };
+
+function sites(){
+  try{ const v = typeof S.settings.sites === 'string' ? JSON.parse(S.settings.sites) : S.settings.sites;
+       if(Array.isArray(v) && v.length) return v; }catch(e){}
+  return [{ id:'lawley', name:'Lawley — layer house 1' }];
+}
+let BUILD_SITE = '';
+function addSite(){
+  if(!can('admin')) return toast('Only the CEO or a manager can add a site');
+  const n = prompt('Name of the new site (e.g. "New land — house 2")'); if(!n || n.trim().length < 2) return;
+  const list = sites(); const id = 'site' + Date.now().toString(36);
+  list.push({ id, name:n.trim() }); S.settings.sites = JSON.stringify(list); S.settingsDirty = true;
+  BUILD_SITE = id; save(); renderAll(); syncNow(true); toast('Site added — its build checklist starts empty');
+}
+function equipEvery(id, def){
+  try{ const o = JSON.parse(S.settings.equip_every || '{}'); if(num(o[id]) > 0) return num(o[id]); }catch(e){}
+  return def;
+}
+function setEquipEvery(id){
+  if(!can('admin')) return toast('Only the CEO or a manager can change intervals');
+  const it = EQUIP.find(x => x[0] === id);
+  const v = prompt('Every how many days for "' + it[1] + '"?', equipEvery(id, it[3])); if(v === null) return;
+  if(!(num(v) > 0)) return toast('A number of days');
+  let o = {}; try{ o = JSON.parse(S.settings.equip_every || '{}'); }catch(e){}
+  o[id] = num(v); S.settings.equip_every = JSON.stringify(o); S.settingsDirty = true;
+  save(); renderAll(); syncNow(true);
+}
+function equipDone(id){
+  if(!can('write')) return toast('Only the people doing the work can record this');
+  queue('checks', { id:uid('k'), list:'equip', period:today(), item:id, done:true, note:'',
+                    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  toast('Recorded');
+}
+function equipToBuy(id){
+  if(!can('write')) return;
+  const it = EQUIP.find(x => x[0] === id), pid = 'eq-' + id;
+  const cur = buyState().cur.find(x => x.id === pid);
+  if(cur && (cur.status === 'need' || cur.status === 'ordered' || cur.status === 'quoted')) return toast('Already on the buying list');
+  queue('purchases', { rid:uid('pr'), id:pid, item:it[1] + ' (replacement)', category:'hardware', priority:'2', qty:'1',
+    est_low:0, est_high:0, status:'need', supplier:'', actual:0, date:'', note:'From the equipment register — ' + it[4] + '.',
+    by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() });
+  toast('Added to the buying list');
+}
+function lastEquip(id){
+  let last = '';
+  S.checks.forEach(c => { if(c.list === 'equip' && c.item === id && c.done && c.period > last) last = c.period; });
+  return last;
+}
+function renderBuildEquip(){
+  if(!$('t-build')) return;
+  const ro = !can('write'), w = can('write');
+  /* build */
+  const ss = sites(); if(!ss.some(x => x.id === BUILD_SITE)) BUILD_SITE = ss[0].id;
+  let dn = 0, tot = 0;
+  const cards = BUILD.map(([phase, items]) => {
+    let pd = 0;
+    const rows = items.map(it => { const t = tickOf('build', BUILD_SITE, it[0]); if(t && t.done){ pd++; dn++; } tot++;
+      return chkRow('build', BUILD_SITE, [it[0], '', it[1], it[2], it[3]]); }).join('');
+    return listCard(phase, '', rows, pd, items.length);
+  }).join('');
+  $('t-build').innerHTML =
+    '<div class="card"><h2>From bare ground to birds <span class="pill ' + (dn===tot?'g':'y') + '">' + dn + ' of ' + tot + '</span></h2>' +
+    '<p class="muted" style="margin:-4px 0 8px">One checklist per site. Tick what is done — for the house already running, tick what is in place; what stays open is what is still missing.</p>' +
+    '<div class="f2"><div class="field"><label>Site</label><select id="siteSel" onchange="BUILD_SITE=this.value;renderBuildEquip()">' +
+      ss.map(x => '<option value="' + esc(x.id) + '"' + (x.id===BUILD_SITE?' selected':'') + '>' + esc(x.name) + '</option>').join('') + '</select></div>' +
+    (can('admin') ? '<div class="field"><label>&nbsp;</label><button class="btn sm ghost" onclick="addSite()">+ New site / new land</button></div>' : '') + '</div>' +
+    '<div class="prog"><i style="width:' + (tot?Math.round(dn/tot*100):0) + '%"></i></div></div>' + cards;
+
+  /* equipment */
+  const t = today(), start = st('equip_start') || '2026-07-22';
+  let late = 0;
+  const groups = Object.keys(EQ_KIND).map(kind => {
+    const rows = EQUIP.filter(x => x[2] === kind).map(([id, name, , def, life, todo, kb]) => {
+      const every = equipEvery(id, def), last = lastEquip(id), from = last || start;
+      const left = every - days(from, t);
+      const dueD = addD(from, every);
+      let cls = 'ok', label = 'due ' + fmtD(dueD) + (dueD.slice(0,4) !== t.slice(0,4) ? ' ' + dueD.slice(0,4) : '');
+      if(left < 0){ cls = 'late'; label = Math.abs(left) + ' days overdue'; late++; }
+      else if(left <= Math.min(14, Math.ceil(every/4))){ cls = 'soon'; label = 'due in ' + left + ' day' + (left===1?'':'s'); }
+      return '<div class="chk locked-row"><span class="box" style="background:var(--' + (cls==='late'?'red':cls==='soon'?'gold':'accent') +
+        ');border:none">' + (cls==='ok'?'✓':cls==='late'?'!':'•') + '</span><span class="body"><div class="t">' + esc(name) + '</div>' +
+        '<div class="d">' + esc(todo) + '</div>' +
+        '<div class="d" style="margin-top:5px">Lasts: ' + esc(life) + ' · every ' + every + ' days · ' +
+          (last ? 'last ' + (kind==='replace'?'replaced':'done') + ' ' + fmtD(last) : 'counted from ' + fmtD(start)) +
+          ' · <a href="#" onclick="openKB(\'' + kb + '\');return false">Why?</a>' +
+          (can('admin') ? ' · <a href="#" onclick="setEquipEvery(\'' + id + '\');return false">Change</a>' : '') + '</div>' +
+        (w ? '<div class="btn-row" style="margin-top:8px"><button class="btn sm ghost" onclick="equipDone(\'' + id + '\')">' + EQ_KIND[kind][1] + '</button>' +
+          (kind==='replace' ? '<button class="btn sm ghost" onclick="equipToBuy(\'' + id + '\')">🛒 Add to buying list</button>' : '') + '</div>' : '') +
+        '</span><span class="due ' + cls + '">' + label + '</span></div>';
+    }).join('');
+    return '<div class="card"><h2>' + EQ_KIND[kind][0] + '</h2>' + rows + '</div>';
+  }).join('');
+  $('t-equip').innerHTML = (ro ? '<div class="alert blue"><span class="ic">👁️</span><div>You can see the register; the farm team records the work.</div></div>' : '') +
+    '<div class="card"><h2>Equipment register <span class="pill ' + (late?'r':'g') + '">' + (late ? late + ' overdue' : 'up to date') + '</span></h2>' +
+    '<p class="muted" style="margin:0">What has to be replaced, what has to be serviced, and what was bought once — how long each lasts and when it is next due. ' +
+    'Lifespans are typical figures; change any interval to match what you see.</p></div>' + groups;
+  document.querySelectorAll('.sb-tasks').forEach(el => {
+    const n = num(el.dataset.health) + late; el.style.display = n ? 'grid' : 'none'; el.textContent = n; });
+}
 
 /* =====================================================================
    FORM 9 — VISITOR REGISTER
@@ -2531,7 +2773,7 @@ function renderVisitors(){
     '<div class="rec"><span class="d">' + fmtD(x.date) + '</span><span class="m"><b>' + esc(x.name) + '</b>' +
     (x.reason ? ' · ' + esc(x.reason) : '') +
     (x.own_poultry ? ' <span class="pill r">keeps poultry</span>' : '') +
-    (!x.footbath ? ' <span class="pill y">no footbath</span>' : '') + '</span></div>').join('')
+    (!x.footbath ? ' <span class="pill y">no footbath</span>' : '') + '</span>' + edBtn('visitors', x) + '</div>').join('')
     : '<p class="muted">Nobody signed in yet.</p>';
 }
 ['vOwn','vFoot'].forEach(id => { const el = $(id); if(el) el.addEventListener('change', visitorPreview); });
@@ -2566,6 +2808,8 @@ const TIPS = {
   counter:['<b>Where it is sold.</b> No single shop sells everything. Poultry equipment shops, a registered vet counter, hardware stores and online shops each cover part of the list. Anything that goes into a bird or its water comes from the vet counter only.','buying-rules'],
   suppliers:['<b>Supplier book</b> — who we buy from, who quoted us and who else is out there, with the reason. Before a big purchase, get two comparison quotes.','buying-rules'],
   approve:['<b>Who must approve</b>, from the Finance Policy: up to R500 any one partner with a receipt · R501–R2,500 Finance and Operations together · R2,501–R10,000 all partners in writing · above R10,000 or any loan all partners and the investor, signed. Feed never waits for approval.','finance-policy'],
+  kpi:['<b>Key numbers</b> from the last 7 recorded days. Feed per dozen and feed cost per egg use the feed you recorded, or the normal ration where the feed box was left blank.','key-numbers'],
+  audit:['<b>Audit trail</b> — nothing is ever really deleted. A correction keeps the old version, the new one, the reason and the name. Someone else then accepts it or queries it.','records'],
   ndint:['<b>Newcastle booster interval</b>. Vaccination is compulsory in South Africa. Published guidance ranges from every 4–6 weeks to every 60–90 days — set what your vet recommends.','vaccination']
 };
 function decorateTips(){
@@ -2915,6 +3159,242 @@ document.querySelectorAll('#supFilter button').forEach(b => b.onclick = () => {
   b.classList.add('on'); SUP_F = b.dataset.f; SUP_OPEN = ''; renderSuppliers();
 });
 
+/* =====================================================================
+   CORRECTIONS & THE AUDIT TRAIL
+   Tap ✎ on any entry to correct it or delete it. A reason is required.
+   The record as it was goes to the audit trail untouched; the corrected
+   version becomes the record. The accountant, CEO or a manager then
+   accepts it as a genuine error or queries it — never their own.
+   ===================================================================== */
+const EDIT_SPEC = {
+  records:  { title:'Daily record', key:'date', fields:[['date','Date','date',true],['eggs','Eggs collected','int'],
+              ['broken','Broken / dirty','int'],['feed','Feed kg (blank = normal ration)','dec'],['water','Water litres','dec'],['note','Note','text']] },
+  sales:    { title:'Sale', fields:[['date','Date the eggs left','date'],['customer','Customer','text'],['trays','Trays','int'],
+              ['singles','Loose eggs','int'],['amount','Amount (R)','dec'],['paid','Paid','sel:cash,transfer,owed'],['note','Note','text']] },
+  weights:  { title:'Bird weight', fields:[['date','Date','date'],['batch','Batch','batch'],['tag','Tag number','text'],['kg','Weight (kg)','dec']] },
+  health:   { title:'Health record', fields:[['date','Date','date'],['batch','Batch','batch'],['kind','What happened','sel:death,cull,illness,treatment'],
+              ['birds','Birds affected','int'],['treatment','Treatment / product','text'],['withdraw','Withdrawal days','int'],['note','Note','text']] },
+  feed:     { title:'Feed delivery', fields:[['date','Date','date'],['bags','Bags','dec'],['price','Price per bag (R)','dec'],['sup','Supplier','text']] },
+  water:    { title:'Water', fields:[['date','Date','date'],['litres','Litres','dec'],['source','Source','text'],['cost','Cost (R)','dec'],['note','Note','text']] },
+  expenses: { title:'Ledger entry', money:true, fields:[['date','Date','date'],['kind','Type','sel:operating,capital'],
+              ['category','Category','sel:feed,payroll,water,health,transport,packaging,housing,livestock,equipment,setup,other'],
+              ['description','What it was for','text'],['supplier','Supplier','text'],['invoice','Invoice no','text'],
+              ['amount','Amount (R)','dec'],['vat','VAT (R)','dec']] },
+  visitors: { title:'Visitor', fields:[['date','Date','date'],['name','Name','text'],['reason','Reason','text'],
+              ['own_poultry','Keeps poultry at home','bool'],['footbath','Used the footbath','bool']] }
+};
+const REASONS = ['Typing mistake','Wrong date','Wrong customer or supplier','Counted twice','Entered by mistake',
+                 'Late information — the real figure came in','Other'];
+const FIELD_NAMES = { feed_kg:'feed kg', water_l:'water L', withdraw_days:'withdrawal days', weight_kg:'kg',
+                      invoice_no:'invoice', safe_from:'safe from', own_poultry:'keeps poultry' };
+let ED = null, AUD_F = 'open';
+
+function recKey(table, r){ return table === 'records' ? r.date : r.id; }
+function findRec(table, id){ return (S[table]||[]).find(r => recKey(table, r) === id); }
+function canEdit(table, r){
+  if(!can('write')) return false;
+  if(EDIT_SPEC[table] && EDIT_SPEC[table].money && !can('money')) return false;
+  if(myRole() === 'ops' && table !== 'records' && r && r.by && r.by !== (S.auth.me && S.auth.me.name)) return false;
+  return true;
+}
+function corrections(table, id){
+  return S.audit.filter(a => a.table === table && a.record_id === String(id) && a.action !== 'review');
+}
+/* the ✎ button on a list row — or a small marker when the entry has a correction history */
+function edBtn(table, r){
+  const id = recKey(table, r), n = corrections(table, id).length;
+  const mark = n ? '<span class="pill y" style="margin-left:6px">corrected' + (n > 1 ? ' ×' + n : '') + '</span>' : '';
+  if(!canEdit(table, r)) return n ? mark : '';
+  return mark + '<button class="edb" onclick="openEditor(\'' + table + '\',\'' + esc(id) + '\')" aria-label="Correct or delete">✎ Fix</button>';
+}
+
+function openEditor(table, id, prefill){
+  const spec = EDIT_SPEC[table], r = findRec(table, id);
+  if(!spec || !r) return toast('That entry is not on this phone yet — sync first');
+  ED = { table, id };
+  const v = { ...r, ...(prefill || {}) };
+  const bs = batches();
+  $('edTitle').textContent = 'Correct: ' + spec.title;
+  const hist = corrections(table, id);
+  $('edBody').innerHTML =
+    '<p class="muted" style="margin:0 0 10px">Recorded by ' + esc(r.by || '—') + '. Change what is wrong and give the reason. ' +
+    'The entry as it is now is kept in the audit trail.</p>' +
+    spec.fields.map(([k, label, type, ro]) => {
+      const val = v[k] == null ? '' : v[k];
+      let input;
+      if(type === 'bool') input = '<select id="ef-' + k + '"><option value="yes"' + (val ? ' selected' : '') + '>Yes</option><option value="no"' + (!val ? ' selected' : '') + '>No</option></select>';
+      else if(type === 'batch') input = '<select id="ef-' + k + '">' + bs.map(b => '<option value="' + esc(b.id) + '"' + (b.id === val ? ' selected' : '') + '>' + esc(b.name) + '</option>').join('') + '</select>';
+      else if(type.indexOf('sel:') === 0) input = '<select id="ef-' + k + '">' + type.slice(4).split(',').map(o => '<option' + (o === String(val) ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
+      else input = '<input id="ef-' + k + '" type="' + (type === 'date' ? 'date' : type === 'text' ? 'text' : 'number') + '"' +
+        (type === 'dec' ? ' step="0.01" inputmode="decimal"' : type === 'int' ? ' inputmode="numeric"' : '') +
+        ' value="' + esc(val) + '"' + (ro ? ' disabled' : '') + '>';
+      return '<div class="field"><label>' + label + '</label>' + input + '</div>';
+    }).join('') +
+    '<div class="field"><label>Why is it changing? (required)</label><select id="efWhy">' +
+      REASONS.map(x => '<option>' + x + '</option>').join('') + '</select></div>' +
+    '<div class="field"><label>Explain in a few words</label><input type="text" id="efWhy2" placeholder="e.g. wrote 45, the sheet says 54"></div>' +
+    (signedOffMonth(r.date) ? '<div class="alert gold"><span class="ic">🔒</span><div><b>' + monthName(String(r.date).slice(0,7)) +
+      ' is already signed off.</b> The correction will be flagged for the accountant.</div></div>' : '') +
+    '<div class="btn-row"><button class="btn" onclick="saveEdit()">Save correction</button>' +
+    '<button class="btn red" onclick="deleteEntry()">Delete entry</button></div>' +
+    (hist.length ? '<h3 style="font-size:14px;margin:16px 0 4px">Earlier corrections</h3>' + hist.map(auditRow).join('') : '');
+  $('editor').classList.add('on');
+}
+function closeEditor(){ $('editor').classList.remove('on'); ED = null; }
+function signedOffMonth(date){
+  const ym = String(date || '').slice(0, 7);
+  const last = S.recon.filter(r => r.period === ym).sort((a,b) => b.ts - a.ts)[0];
+  return !!(last && last.status === 'matched');
+}
+function editReason(){
+  const a = $('efWhy').value, b = $('efWhy2').value.trim();
+  if(a === 'Other' && b.length < 3) { toast('Say why it is changing'); return ''; }
+  return b ? a + ' — ' + b : a;
+}
+function readEditor(){
+  const spec = EDIT_SPEC[ED.table], r = findRec(ED.table, ED.id), out = { ...r };
+  spec.fields.forEach(([k, , type]) => {
+    const el = $('ef-' + k); if(!el) return;
+    if(type === 'bool') out[k] = el.value === 'yes';
+    else if(type === 'int' || type === 'dec') out[k] = (k === 'feed' || k === 'water') && el.value === '' ? '' : num(el.value);
+    else out[k] = el.value.trim();
+  });
+  /* keep derived values right */
+  if(ED.table === 'sales') out.eggs = num(out.trays) * (stN('tray_size') || 30) + num(out.singles);
+  if(ED.table === 'weights'){
+    const b = batches().find(x => x.id === out.batch);
+    if(b) out.verdict = verdictFor(batchAge(b, out.date), out.kg).v;
+    out.tag = String(out.tag).padStart(3,'0');
+  }
+  if(ED.table === 'health') out.safe_from = num(out.withdraw) > 0 ? addD(out.date, num(out.withdraw)) : '';
+  return out;
+}
+function queueEdit(action, after, reason){
+  const e = { aid:uid('a'), table:ED.table, id:String(ED.id), action, after, reason,
+              by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() };
+  S.q.edits = S.q.edits || []; S.q.edits.push(e);
+  applyEditLocal(e);
+  closeEditor(); save(); renderAll(); syncNow(true);
+}
+function applyEditLocal(e){
+  const list = S[e.table]; if(!list) return;
+  const i = list.findIndex(r => recKey(e.table, r) === e.id);
+  const before = i >= 0 ? list[i] : null;
+  if(e.action === 'delete'){ if(i >= 0) list.splice(i, 1); }
+  else if(i >= 0) list[i] = { ...e.after };
+  if(!S.audit.some(a => a.id === e.aid))
+    S.audit.push({ id:e.aid, table:e.table, record_id:e.id, action:e.action, before, after:e.action==='delete'?null:e.after,
+                   reason:e.reason, after_signoff:'', status:'syncing', by:e.by, by_id:(S.auth.me&&S.auth.me.id)||'', ts:e.ts });
+}
+function saveEdit(){
+  if(!ED) return;
+  const r = findRec(ED.table, ED.id); if(!canEdit(ED.table, r)) return toast('You cannot correct this entry');
+  const reason = editReason(); if(!reason) return;
+  const after = readEditor();
+  if(ED.table === 'sales' && WALKIN.test(after.customer) && after.customer !== r.customer) return toast('Use a real customer name');
+  if(ED.table === 'weights' && !(after.kg > 0 && after.kg <= 10)) return toast('Weight in kg, like 1.85');
+  if(ED.table === 'expenses' && !(after.amount > 0)) return toast('An amount is needed');
+  const changed = Object.keys(after).some(k => String(after[k]) !== String(r[k]));
+  if(!changed) return toast('Nothing was changed');
+  queueEdit('edit', after, reason);
+  toast('Corrected — the old version is in the audit trail');
+}
+function deleteEntry(){
+  if(!ED) return;
+  const r = findRec(ED.table, ED.id); if(!canEdit(ED.table, r)) return toast('You cannot delete this entry');
+  const reason = editReason(); if(!reason) return;
+  if(!confirm('Delete this ' + EDIT_SPEC[ED.table].title.toLowerCase() + '? It stops counting everywhere, but a full copy stays in the audit trail.')) return;
+  queueEdit('delete', null, reason);
+  toast('Deleted — a full copy is in the audit trail');
+}
+
+/* ---------- the audit trail ---------- */
+function reviewsOf(aid){ return S.audit.filter(a => a.action === 'review' && a.record_id === aid).sort((a,b) => b.ts - a.ts); }
+function auditState(a){
+  if(a.status === 'rejected') return ['Not applied','r'];
+  if(a.status === 'syncing') return ['Waiting to sync','b'];
+  const rv = reviewsOf(a.id)[0];
+  if(!rv) return ['Waiting for review','y'];
+  return rv.status === 'accepted' ? ['Accepted as an error','g'] : ['Queried','r'];
+}
+function showVal(k, v){
+  if(v === true || v === 'yes') return 'yes'; if(v === false || v === 'no') return 'no';
+  if(v === '' || v == null) return '—';
+  return esc(v);
+}
+function diffHtml(a){
+  const b = a.before || {}, f = a.after || {};
+  if(a.action === 'delete') return '<div class="diff"><b>Deleted:</b> ' + Object.keys(b).filter(k => k !== 'ts' && k !== 'by' && b[k] !== '' && b[k] != null)
+    .map(k => (FIELD_NAMES[k] || k) + ' ' + showVal(k, b[k])).join(' · ') + '</div>';
+  const keys = Object.keys(f).filter(k => k !== 'ts' && k !== 'by' && String(f[k]) !== String(b[k]));
+  return '<div class="diff">' + (keys.length ? keys.map(k => '<b>' + (FIELD_NAMES[k] || k) + ':</b> <s>' + showVal(k, b[k]) +
+    '</s> → <ins>' + showVal(k, f[k]) + '</ins>').join('<br>') : 'no field changed') + '</div>';
+}
+function auditRow(a){
+  const st = auditState(a), rv = reviewsOf(a.id);
+  const spec = EDIT_SPEC[a.table] || { title:a.table };
+  const when = (() => { try{ return new Date(a.ts).toLocaleString('en-ZA',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } })();
+  const mine = (S.auth.me && (a.by_id ? a.by_id === S.auth.me.id : a.by === S.auth.me.name));
+  const canReview = can('recon') && !mine && a.status !== 'rejected' && a.status !== 'syncing';
+  const date = (a.before && (a.before.date)) || (a.after && a.after.date) || '';
+  return '<div class="aud"><div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:14px">' +
+    (a.action === 'delete' ? '🗑 Deleted ' : '✎ Corrected ') + esc(spec.title.toLowerCase()) + (date ? ' · ' + fmtD(date) : '') +
+    '</b><span class="pill ' + st[1] + '">' + st[0] + '</span></div>' + diffHtml(a) +
+    '<div class="meta muted">Why: ' + esc(a.reason || '—') + '</div>' +
+    '<div class="meta muted">By ' + esc(a.by) + ' · ' + when + (a.after_signoff === 'yes' ? ' · <span class="pill r">after the month was signed off</span>' : '') + '</div>' +
+    rv.map(r => '<div class="meta muted">' + (r.status === 'accepted' ? '✅ Accepted' : '❓ Queried') + ' by ' + esc(r.by) +
+      (r.reason ? ': ' + esc(r.reason) : '') + '</div>').join('') +
+    (canReview ? '<div class="btn-row" style="margin-top:8px"><button class="btn sm" onclick="reviewAudit(\'' + a.id + '\',\'accepted\')">Accept as an error</button>' +
+      '<button class="btn sm ghost" onclick="reviewAudit(\'' + a.id + '\',\'queried\')">Query it</button></div>' : '') + '</div>';
+}
+function reviewAudit(aid, status){
+  if(!can('recon')) return toast('Only the accountant, CEO or a manager reviews corrections');
+  const note = prompt(status === 'accepted' ? 'Accepting this correction. Any note? (optional)' : 'What is the question? (required)') ;
+  if(note === null) return;
+  if(status === 'queried' && note.trim().length < 3) return toast('Write the question for the person who made it');
+  const r = { rid:uid('r'), aid, status, note:note.trim(), by:(S.auth.me&&S.auth.me.name)||'me', ts:Date.now() };
+  S.q.reviews = S.q.reviews || []; S.q.reviews.push(r);
+  S.audit.push({ id:r.rid, table:'', record_id:aid, action:'review', reason:r.note, status, by:r.by,
+                 by_id:(S.auth.me&&S.auth.me.id)||'', ts:r.ts });
+  save(); renderAll(); syncNow(true);
+  toast(status === 'accepted' ? 'Accepted' : 'Query sent');
+}
+function renderAudit(){
+  if(!$('audList')) return;
+  const all = S.audit.filter(a => a.action !== 'review').sort((a,b) => b.ts - a.ts);
+  const open = all.filter(a => auditState(a)[0] === 'Waiting for review');
+  $('audPill').textContent = all.length + ' change' + (all.length === 1 ? '' : 's') + ' · ' + open.length + ' to review';
+  document.querySelectorAll('.sb-audit').forEach(el => { const show = open.length && can('recon');
+    el.style.display = show ? 'inline-grid' : 'none'; el.textContent = open.length; });
+  const list = all.filter(a => AUD_F === 'all' ? true : AUD_F === 'open' ? auditState(a)[0] === 'Waiting for review' : auditState(a)[1] === 'r');
+  $('audList').innerHTML = '<div class="card">' + (list.length ? list.map(auditRow).join('')
+    : '<p class="muted">' + (AUD_F === 'open' ? 'Nothing waiting for review.' : 'Nothing here.') + '</p>') + '</div>';
+}
+document.querySelectorAll('#audFilter button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#audFilter button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); AUD_F = b.dataset.f; renderAudit();
+});
+
+
+/* ---------- key numbers: the handful every layer farmer watches ---------- */
+function renderKPIs(){
+  if(!$('kpiBox')) return;
+  const c = calc(), r7 = c.last7;
+  const eggs = r7.reduce((a,r)=>a+num(r.eggs),0), broken = r7.reduce((a,r)=>a+num(r.broken),0);
+  const feedKg = r7.reduce((a,r)=>a+(r.feed===''||r.feed==null ? c.dailyKg : num(r.feed)),0);
+  const perDozen = eggs ? feedKg/(eggs/12) : 0;
+  const feedPerEgg = eggs ? feedKg*stN('bag_price')/(stN('bag_kg')||50)/eggs : 0;
+  const price = c.monEggs ? c.monRand/c.monEggs : stN('tray_price')/(stN('tray_size')||30);
+  const mort = c.birdsRaw ? c.deaths/c.birdsRaw*100 : 0;
+  const brokenPct = eggs ? broken/(eggs)*100 : 0;
+  const L = (k, v, note, cls) => '<div class="line"><span>' + k + (note ? '<br><span class="muted">' + note + '</span>' : '') +
+    '</span><b' + (cls ? ' style="color:var(--' + cls + ')"' : '') + '>' + v + '</b></div>';
+  $('kpiBox').innerHTML = !r7.length ? '<p class="muted">Record a few days and the numbers appear here.</p>' :
+    L('Feed per dozen eggs', perDozen ? perDozen.toFixed(2) + ' kg' : '—', 'lower is better — rising means waste, rats or falling lay') +
+    L('Feed cost per egg', feedPerEgg ? R2(feedPerEgg) : '—', 'against ' + R2(price) + ' an egg sold', feedPerEgg > price ? 'red' : '') +
+    L('Broken and dirty', brokenPct.toFixed(1) + '%', 'aim for under about 3%; rising means trays, collection or shells', brokenPct > 5 ? 'red' : '') +
+    L('Deaths since placement', mort.toFixed(1) + '% (' + c.deaths + ' birds)', 'Hy-Line: about 5% over the whole lay to 80 weeks', mort > 5 ? 'red' : '');
+}
 /* ---------- team ---------- */
 async function loadTeam(quiet){
   if(!isAdmin()) return;
@@ -3143,7 +3623,7 @@ function applyRole(){
 }
 function renderAll(){
   const parts = [renderHome, renderLists, renderMoney, renderBooks, renderSetup, renderTasks,
-                 renderVisitors, renderBuyQuiet, applyRole, decorateTips];
+                 renderVisitors, renderBuyQuiet, renderAudit, renderKPIs, applyRole, decorateTips];
   parts.forEach(fn => { try{ fn(); }catch(e){ console.error(fn.name, e); } });
 }
 
@@ -3171,7 +3651,7 @@ function openSheet(){ $('sheet').classList.add('on'); }
 function closeSheet(){ $('sheet').classList.remove('on'); }
 document.querySelectorAll('#side button, nav#bottom button, #sheet button[data-v]')
   .forEach(b => b.onclick = () => go(b.dataset.v));
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet(); hideTip(); } });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeSheet(); hideTip(); closeEditor(); } });
 document.querySelectorAll('#bookTabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#bookTabs button').forEach(x => x.classList.remove('on'));
   b.classList.add('on');
